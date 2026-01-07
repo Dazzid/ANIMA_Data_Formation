@@ -37,7 +37,15 @@ Enhanced `voicing.py` module with 7 voicing templates (`v_0` through `v_6`) per 
 - Support for all common jazz chord types (maj7, m7, dom7, ø7, dim7, sus, aug, etc.)
 - Voice leading optimization methods available
 
-**Status**: ✅ Completed - Enhanced voicing system implemented
+#### What's Been Completed (Notebook: 01_musicXML_parser.ipynb)
+1. ✅ **XML Parsing** - Parse ~4,000 iReal Pro XML files into structured chord progressions
+2. ✅ **Song Structure Expansion** - Expand repeats, codas, and form markers into full sequences
+3. ✅ **Chord Tokenization** - Add 'maj' tokens to single-note symbols for clarity
+4. ✅ **Duration Handling** - Extract and process rhythmic durations from XML
+5. ✅ **MIDI Voicing** - Convert chord symbols to MIDI note arrays using voicing.py
+6. ✅ **Validation** - XML-to-token accuracy verification (~93.4% match rate)
+
+**Status**: ✅ Stage 1 Core Complete - Ready for Stage 2 (Transposition)
 
 ---
 
@@ -57,7 +65,12 @@ Expand dataset through intelligent transposition.
 - Model generalization across all keys
 - Manageable dataset size for training
 
-**Status**: 🔄 Planned
+#### Implementation Progress
+- ✅ **Transposition Module** - `transposition.py` with `transpose_song()` method
+- ✅ **Testing** - Verified transposition on sample songs
+- ⏳ **Full Dataset** - Need to run complete 12-key augmentation on all 4,000 songs
+
+**Status**: 🔧 In Progress - Transposition code ready, needs full dataset run
 
 ---
 
@@ -223,11 +236,13 @@ Train transformer model on hybrid 12-TET/53-TET sequences.
 
 ## 🚀 Immediate Next Steps
 
-1. **✅ Enhanced Voicing System** - Implement professional voicing algorithms
-2. **Build iReal → MIDI Pipeline** - Batch converter with consistent rules
-3. **Generate Test Dataset** - 100 songs to validate pipeline
-4. **Implement Tokenizer** - Ensure reversibility (tokens ↔ MIDI lossless)
-5. **Synthetic Microtonal Test** - 10 examples to validate substitution logic
+1. **✅ XML → MIDI Pipeline** - Complete with validation (93.4% accuracy)
+2. **✅ Voicing System** - 7 templates implemented and tested
+3. **🔧 Run Full Transposition** - Execute 12-key augmentation on all 4,000 songs → 48,000
+4. **⏳ Export MPE-MIDI Files** - Generate MPE format for all augmented progressions
+5. **⏳ Implement Tokenizer** - Design metadata + MIDI token vocabulary
+6. **⏳ Stage 3 Prototype** - Create microtonal substitution rules (10% level)
+7. **⏳ Training Pipeline** - Prepare dataset for GPT-2 training
 
 ---
 
