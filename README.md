@@ -1,2 +1,250 @@
-# ANIMA_Data_Formation
-Form a dataset of MIDI chord progressions
+# ANIMA Data Formation
+
+**ANIMA** (Adaptive Neural Intelligence for Musical Augmentation) - A pipeline for creating hybrid 12-TET/53-TET MIDI chord progression datasets for training transformer models on microtonal harmony.
+
+## 🎯 Project Overview
+
+This project aims to create a comprehensive dataset of chord progressions that bridges standard Western harmony (12-tone equal temperament) with microtonal music (53-TET) for training GPT-2 style models capable of generating musically coherent microtonal compositions.
+
+**Source**: ~4,000 jazz standards from iReal Pro  
+**Target**: 48,000+ transposed progressions with microtonal augmentation  
+**Output**: MPE-MIDI format with pitch bend for microtonal accuracy
+
+---
+
+## 📋 Pipeline Stages
+
+### **Stage 1: iReal → MIDI Dataset Creation**
+
+Convert iReal Pro chord charts to high-quality MIDI with professional voicing.
+
+#### Voicing Strategy
+- **Register**: Bass root in C2-C3, chord tones spanning 1-2 octaves
+- **Voicing Style**: 7 distinct voicing templates per chord type:
+  - Various open and closed positions
+  - Different note spacings and doublings
+  - Extended voicings with 9ths, 11ths, 13ths
+- **Voice Leading**: Smooth transitions with minimal motion between chords
+- **Duration**: Block chords (whole/half notes) to focus on harmonic content
+
+#### Rhythm Implementation
+- **Simple Approach**: Quarter/half note chords aligned to harmonic rhythm
+
+#### Technical Implementation
+Enhanced `voicing.py` module with 7 voicing templates (`v_0` through `v_6`) per chord type:
+- Each template offers different harmonic textures and voice distributions
+- Automated template selection based on chord position in progression
+- Support for all common jazz chord types (maj7, m7, dom7, ø7, dim7, sus, aug, etc.)
+- Voice leading optimization methods available
+
+**Status**: ✅ Completed - Enhanced voicing system implemented
+
+---
+
+### **Stage 2: Enharmonic Transposition**
+
+Expand dataset through intelligent transposition.
+
+#### Augmentation Strategy
+- **Scale**: 12 transpositions per song → **48,000 examples**
+- **Key Consideration**: Track actual pitch height (critical for 53-TET mapping)
+  - In 12-TET: C# = Db
+  - In 53-TET: C# ≠ Db (different microtonal positions)
+- **Register Management**: Avoid extremely high/low transpositions
+
+#### Benefits
+- Natural key distribution balance
+- Model generalization across all keys
+- Manageable dataset size for training
+
+**Status**: 🔄 Planned
+
+---
+
+### **Stage 3: Microtonal Data Augmentation**
+
+Progressive introduction of 53-TET microtonality.
+
+#### Three Levels of Microtonal Integration
+
+##### **Level 1: 10% Microtonal (Sparse Substitutions)**
+- Replace 1-2 chords per progression with 53-TET alternatives
+- **Targets**: Dominant chords (septimal 7ths), color chords (maj7, min7)
+- **Goal**: Teach model "microtonal chords in familiar contexts"
+- **Method**: Maintain functional harmonic logic
+
+##### **Level 2: 50% Microtonal (Hybrid)**
+- Systematic alternation: 12-TET → 53-TET → 12-TET → 53-TET
+- **Goal**: Model learns transitions between tuning systems
+- **Application**: Bridges familiar and novel harmonic spaces
+
+##### **Level 3: 100% Microtonal (Full EigenSpace)**
+- Entire progressions in 53-TET
+- Navigate EigenSpace using dissonance metrics
+- **Goal**: Purely microtonal harmonic syntax
+- **Application**: Explore novel microtonal progressions
+
+#### 53-TET Substitution Methods
+
+| Method | Approach | Best For |
+|--------|----------|----------|
+| **Option A** | Pre-map 12-TET → 53-TET equivalents<br/>(e.g., Cmaj7 → C with 7-limit just maj7) | Maintaining familiar sonorities |
+| **Option B** | EigenSpace dissonance similarity matching | Exploring new harmonic space (100%) |
+| **Option C** | Preserve root+quality, microtune intervals<br/>(e.g., flatten 7th by 31¢ for harmonic 7th) | **Recommended for 10%** (preserves function) |
+
+**Status**: 🔄 Planned
+
+---
+
+### **Stage 4: Tokenization Strategy**
+
+Convert MIDI data to transformer-compatible token sequences with metadata prefixes.
+
+#### Sequence Structure
+
+Each sequence consists of two parts:
+1. **Metadata Header** - Musical context and properties
+2. **MIDI Content** - Note events with pitch bend information
+
+#### Hybrid Vocabulary Design
+
+##### Metadata Tokens (Sequence Prefix)
+- `<SONG_NAME>` - Song title or identifier
+- `<STYLE>` - Genre/style (jazz, bossa, swing, ballad, etc.)
+- `<KEY>` - Tonal center (C, Bb, F#m, etc.)
+- `<TEMPO>` - BPM value (60-240)
+- `<TIME_SIG>` - Time signature (4/4, 3/4, 5/4, etc.)
+- `<FORM>` - Song structure (AABA, ABAC, 12-bar blues, etc.)
+- `<TUNING>` - Tuning system (12-TET, 53-TET-10%, 53-TET-50%, 53-TET-100%)
+- `<BARS>` - Total number of bars
+
+##### Core MIDI Token Types
+- **Pitch**: 0-127 (standard MIDI, represents 12-TET base)
+- **Pitch Bend**: Discrete values (-100 to +100 in 2¢ steps ≈ 100 tokens)
+- **Time**: Quantized to 16th or 32nd notes
+- **Channel**: 1-15 (MPE channels for polyphonic pitch bend)
+- **Velocity**: Quantized to 8-16 levels
+
+##### Structural Tokens
+- `<BOS>`, `<EOS>` - Sequence boundaries
+- `<BAR>`, `<BEAT>` - Metrical structure
+- `<SECTION>` - Form sections (A, B, C, Bridge, Coda, etc.)
+
+#### Example Token Sequence (Note-Level with Metadata)
+```
+<BOS>
+<SONG_NAME_Autumn_Leaves>
+<STYLE_jazz_standard>
+<KEY_Gm>
+<TEMPO_120>
+<TIME_SIG_4/4>
+<FORM_AABA>
+<TUNING_53-TET-10%>
+<BARS_32>
+
+<SECTION_A> <BAR_1>
+<TIME_0> <NOTE_ON_55_ch2_v80> <BEND_ch2_+0>    # Root: G
+<TIME_0> <NOTE_ON_58_ch3_v75> <BEND_ch3_-14>   # Minor 3rd (microtonal)
+<TIME_0> <NOTE_ON_62_ch4_v72> <BEND_ch4_+0>    # Perfect 5th
+<TIME_480> <NOTE_OFF_55_ch2> <NOTE_OFF_58_ch3> <NOTE_OFF_62_ch4>
+
+<BAR_2>
+<TIME_0> <NOTE_ON_60_ch2_v80> <BEND_ch2_+0>    # Next chord...
+...
+<EOS>
+```
+
+#### Alternative: Compound Chord Tokens with Metadata
+```
+<BOS>
+<SONG_NAME_All_The_Things_You_Are>
+<STYLE_jazz_ballad>
+<KEY_Ab>
+<TEMPO_80>
+<TUNING_12-TET>
+
+<SECTION_A> <BAR_1>
+<CHORD root=Ab type=maj7 voices=[56,60,63,67] bends=[0,0,0,0] dur=1920>
+<BAR_2>
+<CHORD root=F type=m7 voices=[53,57,60,64] bends=[0,0,0,0] dur=1920>
+...
+<EOS>
+```
+
+#### Benefits of Metadata Prefix
+- **Conditioning**: Model can generate in specific styles, keys, or tuning systems
+- **Analysis**: Easy filtering and analysis of generated outputs by metadata
+- **Controllable Generation**: Users can specify desired characteristics
+- **Context**: Provides harmonic and stylistic context before processing notes
+
+**Trade-off**: Slightly longer sequences, but dramatically improves controllability
+
+**Status**: 🔄 Planned
+
+---
+
+### **Stage 5: GPT-2 Model Training**
+
+Train transformer model on hybrid 12-TET/53-TET sequences.
+
+#### Architecture
+- **Model Size**: GPT-2 Small (124M parameters) - sufficient for this domain
+- **Context Window**: 1024 tokens (captures several progressions)
+- **Positional Encoding**: Consider relative encoding for variable-length sequences
+
+#### Training Strategies
+
+**Strategy A: Curriculum Learning** (Progressive)
+1. Train on 12-TET only
+2. Gradually introduce 10% microtonal
+3. Progress to 50% microtonal
+4. Finally train on 100% microtonal
+
+**Strategy B: Mixed Training** (Recommended First Attempt)
+- Train on all data levels simultaneously
+- Let model learn the spectrum of microtonality naturally
+- Simpler implementation
+
+#### Evaluation Metrics
+
+##### Quantitative
+- Perplexity on held-out test set
+- Token prediction accuracy
+
+##### Qualitative (Musical)
+- Generate progressions → render to MIDI → listen
+- **Harmonic Function**: Does it preserve functional harmony?
+- **Voice Leading**: Are transitions smooth and musically logical?
+- **Microtonal Coherence**: Do 53-TET inflections follow EigenSpace principles?
+
+**Status**: 🔄 Planned
+
+---
+
+## 🚀 Immediate Next Steps
+
+1. **✅ Enhanced Voicing System** - Implement professional voicing algorithms
+2. **Build iReal → MIDI Pipeline** - Batch converter with consistent rules
+3. **Generate Test Dataset** - 100 songs to validate pipeline
+4. **Implement Tokenizer** - Ensure reversibility (tokens ↔ MIDI lossless)
+5. **Synthetic Microtonal Test** - 10 examples to validate substitution logic
+
+---
+
+## 🎵 Key Technologies
+
+- **Music21** / **mido**: MIDI manipulation
+- **PyTorch**: Model training
+- **iReal Pro**: Source chord chart format
+- **MPE (MIDI Polyphonic Expression)**: Per-note pitch bend
+- **53-TET**: Microtonal tuning system
+- **EigenSpace**: Dissonance-based harmonic navigation
+
+---
+
+## 📖 References
+
+- 53-TET tuning system and EigenSpace theory
+- Modal studio voicing techniques
+- Transformer models for music generation
+- MIDI Polyphonic Expression (MPE) specification

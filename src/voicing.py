@@ -1,4 +1,18 @@
 #make a class of voicing
+# ENHANCED VERSION - Improved voicing system inspired by modal_studio_Chord.js
+# 
+# Key improvements:
+# 1. Seven voicing templates (v_0 to v_6) instead of just 4, providing more variety
+# 2. Each chord type now has sophisticated multi-template voicings with different characteristics:
+#    - Drop-2 voicings for better voice leading
+#    - Open and closed position voicings
+#    - Extended voicings with color tones (9ths, 11ths, 13ths)
+# 3. Advanced voice leading methods:
+#    - optimize_voice_leading(): Minimizes movement between chords
+#    - add_extensions_for_quality(): Adds appropriate extensions based on chord type
+#    - get_drop_2_voicing() and get_drop_3_voicing(): Create jazz-style drop voicings
+# 4. Function-based voicing selection inspired by modal harmony principles
+#
 from midiutil import MIDIFile
 import tqdm as tqdm
 import random
@@ -26,8 +40,9 @@ class Voicing:
         #element in the chord frontiers
         self.after_chords = {'.', '|', '||', ':|', '|:', 'b||', 'e||'} 
         
-        #Voicing
-        self.voicing = ['v_0', 'v_1', 'v_2', 'v_3']
+        #Voicing - 7 different templates inspired by modal_studio_Chord.js
+        # These correspond to different chord functions (I, II, III, IV, V, VI, VII)
+        self.voicing = ['v_0', 'v_1', 'v_2', 'v_3', 'v_4', 'v_5', 'v_6']
         
         #Durations 
         self.durations = {'0.3997395833333333', '0.4440104166666667', '0.5', '0.5703125',
@@ -44,26 +59,214 @@ class Voicing:
             'F##': 55, 'F###': 56, 'Fbb': 51, 'G##': 45, 'Gbb': 41
             }
         
-        #define voicing for natures for piano
-        self.maj = {'v_0':[0, 7, 12, 16], 'v_1':[0, 7, 16, 19], 'v_2':[0, 12, 16, 19], 'v_3':[0, 7, 12, 16]}
-        self.m6 = {'v_0':[0, 7, 9, 16], 'v_1':[0, 9, 16, 19], 'v_2':[0, 9, 12, 16], 'v_3':[0, 9, 12, 16, 19]}
-        self.maj7 = {'v_0':[0, 11, 14, 16, 19], 'v_1':[0, 11, 16, 19], 'v_2':[0, 11, 14, 16], 'v_3':[0, 11, 14, 16, 19]}
-        self.maj6 = {'v_0':[0, 7, 9, 12, 16], 'v_1':[0, 7, 9, 16], 'v_2':[0, 7, 14, 16, 21], 'v_3':[0, 4, 7, 9, 12, 14]}
-        self.power = {'v_0':[0, 7, 12, 19], 'v_1':[0, 7, 12, 19], 'v_2':[0, 7, 12, 24], 'v_3':[0, 7, 12, 24]}
-        self.m = {'v_0':[0, 12, 15, 19], 'v_1':[0, 7, 12, 15], 'v_2':[0, 7, 12, 15, 19], 'v_3':[0, 7, 14, 15, 19]}
-        self.m7 = {'v_0':[0, 10, 15, 19], 'v_1':[0, 7, 10, 15], 'v_2':[0, 10, 14, 15], 'v_3':[0, 10, 14, 15]}
-        self.m_maj7 = {'v_0':[0, 11, 15, 19], 'v_1':[0, 7, 11, 12, 15], 'v_2':[0, 7, 11, 14, 15], 'v_3':[0, 11, 15, 19]}
-        self.dom7 = {'v_0':[0, 10, 14, 16, 19], 'v_1':[0, 10, 16, 19], 'v_2':[0, 10, 14, 16], 'v_3':[0, 10, 14, 16, 19]}
-        self.ø7 =  {'v_0':[0, 15, 18, 22], 'v_1':[0, 10, 15, 18], 'v_2':[0, 12, 15, 18, 22], 'v_3':[0, 6, 10, 15, 18]}
-        self.o7 = {'v_0':[0, 6, 10, 14, 15], 'v_1':[0, 15, 18, 21, 24], 'v_2':[0, 15, 18, 21, 24], 'v_3':[0, 12, 15, 18, 21]}
-        self.o = {'v_0':[0, 3, 6, 12], 'v_1':[0, 6, 12, 15], 'v_2':[0, 15, 18, 21], 'v_3':[0, 12, 15, 18, 21]}
-        self.sus = {'v_0':[0, 12, 17, 19], 'v_1':[0, 17, 19, 24], 'v_2':[0, 10, 14, 17], 'v_3':[0, 7, 14, 17, 19]} 
-        self.sus7 = {'v_0':[0, 10, 17, 19], 'v_1':[0, 10, 14, 17, 19], 'v_2':[0, 10, 14, 17], 'v_3':[0, 10, 14, 17, 19]}
-        self.sus2 = {'v_0':[0, 10, 17, 19], 'v_1':[0, 10, 14, 17, 19], 'v_2':[0, 10, 14, 17], 'v_3':[0, 10, 14, 17, 19]}
-        self.sus4 = {'v_0':[0, 5, 7, 12, 14], 'v_1':[0, 7, 14, 17], 'v_2':[0, 7, 12, 17, 19], 'v_3':[0, 14, 12, 17, 10]}
-        self.aug = {'v_0':[0, 4, 8, 12, 16], 'v_1':[0, 8, 12, 16, 20], 'v_2':[0, 12, 16, 20, 24], 'v_3':[0, 8, 12, 16]}
-        self.o_maj7 = {'v_0':[0, 11, 15, 18], 'v_1':[0, 6, 11, 15], 'v_2':[0, 6, 11, 15, 18], 'v_3':[0, 11, 12, 15, 18]}
-        self.noChord = {'v_0':[0, 0, 0, 0], 'v_1':[0, 0, 0, 0], 'v_2':[0, 0, 0, 0], 'v_3':[0, 0, 0, 0]}
+        # Enhanced voicing templates inspired by modal_studio_Chord.js
+        # Each chord type now has 7 different voicing templates (v_0 through v_6)
+        # These provide better voice leading and more sophisticated harmonic structures
+        
+        # Major chord voicings with 7 templates
+        self.maj = {
+            'v_0': [0, 7, 12, 16],           # Root position, open voicing
+            'v_1': [0, 7, 16, 19],           # Wide spacing, root doubled
+            'v_2': [0, 12, 16, 19],          # Root-fifth-octave-third
+            'v_3': [0, 4, 7, 12, 16],        # Closed position with doubled root
+            'v_4': [0, 12, 16, 19, 24],      # Extended voicing
+            'v_5': [0, 7, 12, 16, 19],       # Balanced voicing
+            'v_6': [0, 7, 12, 14, 16, 19]    # Add 9th for richness
+        }
+        
+        # Major 7th voicings
+        self.maj7 = {
+            'v_0': [0, 11, 16, 19],          # Drop 2 voicing
+            'v_1': [0, 7, 11, 16, 19],       # Full maj7 with fifth
+            'v_2': [0, 11, 14, 16],          # Close voicing
+            'v_3': [0, 4, 7, 11, 14],        # Closed position
+            'v_4': [0, 7, 11, 14, 19],       # Balanced spread
+            'v_5': [0, 7, 11, 16, 19],       # Open voicing
+            'v_6': [0, 7, 11, 14, 16, 19]    # Complete with doubled notes
+        }
+        
+        # Minor chord voicings
+        self.m = {
+            'v_0': [0, 12, 15, 19],          # Root-octave-m3-fifth
+            'v_1': [0, 7, 12, 15],           # Root-fifth-octave-m3
+            'v_2': [0, 7, 15, 19],           # Open minor voicing
+            'v_3': [0, 3, 7, 12],            # Closed position
+            'v_4': [0, 7, 12, 15, 19],       # Extended voicing
+            'v_5': [0, 7, 15, 19, 24],       # Wide spread
+            'v_6': [0, 7, 12, 14, 15, 19]    # Add 9th for color
+        }
+        
+        # Minor 7th voicings
+        self.m7 = {
+            'v_0': [0, 10, 15, 19],          # Drop 2 minor 7
+            'v_1': [0, 7, 10, 15],           # Root-fifth-b7-m3
+            'v_2': [0, 10, 14, 15],          # Close voicing
+            'v_3': [0, 3, 7, 10, 15],        # Full closed
+            'v_4': [0, 7, 10, 15, 19],       # Balanced
+            'v_5': [0, 7, 10, 14, 15, 19],   # Extended
+            'v_6': [0, 7, 10, 14, 15, 22]    # Add 9th in upper register
+        }
+        
+        # Dominant 7th voicings (most important for jazz)
+        self.dom7 = {
+            'v_0': [0, 10, 16, 19],          # Drop 2, no fifth
+            'v_1': [0, 10, 14, 16, 19],      # Full dom7
+            'v_2': [0, 10, 14, 16],          # Close voicing
+            'v_3': [0, 4, 7, 10, 16],        # Closed with bass
+            'v_4': [0, 7, 10, 14, 16, 19],   # Complete voicing
+            'v_5': [0, 7, 10, 16, 19],       # Open drop 2
+            'v_6': [0, 7, 10, 14, 16, 22]    # With 9th extension
+        }
+        
+        # Half-diminished (ø7) voicings
+        self.ø7 = {
+            'v_0': [0, 10, 15, 18],          # Drop 2 half-dim
+            'v_1': [0, 6, 10, 15],           # Root-dim5-b7-m3
+            'v_2': [0, 10, 15, 18, 22],      # Extended
+            'v_3': [0, 3, 6, 10, 15],        # Closed
+            'v_4': [0, 6, 10, 15, 18],       # Balanced
+            'v_5': [0, 6, 10, 14, 15, 18],   # Complete
+            'v_6': [0, 6, 10, 14, 15, 22]    # With 9th
+        }
+        
+        # Diminished 7th voicings
+        self.o7 = {
+            'v_0': [0, 6, 9, 15],            # Symmetrical dim7
+            'v_1': [0, 9, 15, 18],           # Spread dim7
+            'v_2': [0, 9, 15, 18, 21],       # Extended
+            'v_3': [0, 3, 6, 9, 15],         # Closed
+            'v_4': [0, 6, 9, 15, 18],        # Balanced
+            'v_5': [0, 6, 9, 12, 15, 18],    # Complete
+            'v_6': [0, 6, 9, 12, 15, 21]     # Wide spread
+        }
+        
+        # Diminished triad voicings
+        self.o = {
+            'v_0': [0, 3, 6, 12],            # Basic dim triad
+            'v_1': [0, 6, 12, 15],           # Open dim
+            'v_2': [0, 6, 9, 15],            # Spread
+            'v_3': [0, 3, 6, 9, 12],         # Extended
+            'v_4': [0, 6, 9, 12, 15],        # Balanced
+            'v_5': [0, 6, 12, 15, 18],       # Wide
+            'v_6': [0, 3, 6, 12, 15]         # Complete
+        }
+        
+        # Sus4 voicings
+        self.sus = {
+            'v_0': [0, 7, 17, 19],           # Sus4 open
+            'v_1': [0, 5, 7, 12],            # Closed sus4
+            'v_2': [0, 7, 12, 17],           # Balanced
+            'v_3': [0, 5, 7, 12, 17],        # Complete
+            'v_4': [0, 7, 12, 17, 19],       # Extended
+            'v_5': [0, 7, 12, 14, 17],       # With 9th
+            'v_6': [0, 7, 12, 14, 17, 19]    # Full voicing
+        }
+        
+        # Sus7 voicings
+        self.sus7 = {
+            'v_0': [0, 10, 17, 19],          # Sus7 drop 2
+            'v_1': [0, 10, 14, 17],          # Close sus7
+            'v_2': [0, 7, 10, 17],           # Open sus7
+            'v_3': [0, 5, 7, 10, 17],        # Complete
+            'v_4': [0, 7, 10, 14, 17, 19],   # Extended
+            'v_5': [0, 7, 10, 17, 19],       # Balanced
+            'v_6': [0, 7, 10, 14, 17, 22]    # With 9th
+        }
+        
+        # Sus2 voicings
+        self.sus2 = {
+            'v_0': [0, 2, 7, 12],            # Basic sus2
+            'v_1': [0, 7, 14, 19],           # Open sus2
+            'v_2': [0, 2, 7, 14],            # Balanced
+            'v_3': [0, 2, 7, 12, 14],        # Complete
+            'v_4': [0, 7, 14, 19, 24],       # Extended
+            'v_5': [0, 2, 7, 12, 19],        # Wide
+            'v_6': [0, 2, 7, 12, 14, 19]     # Full voicing
+        }
+        
+        # Sus4 specific
+        self.sus4 = {
+            'v_0': [0, 5, 7, 12],            # Basic sus4
+            'v_1': [0, 7, 17, 19],           # Open sus4
+            'v_2': [0, 5, 7, 17],            # Balanced
+            'v_3': [0, 5, 7, 12, 17],        # Complete
+            'v_4': [0, 7, 12, 17, 19],       # Extended
+            'v_5': [0, 5, 7, 12, 14],        # With 9th
+            'v_6': [0, 5, 7, 12, 14, 17]     # Full voicing
+        }
+        
+        # Augmented voicings
+        self.aug = {
+            'v_0': [0, 4, 8, 12],            # Symmetrical aug
+            'v_1': [0, 8, 12, 16],           # Spread aug
+            'v_2': [0, 4, 8, 16],            # Open aug
+            'v_3': [0, 4, 8, 12, 16],        # Complete
+            'v_4': [0, 8, 12, 16, 20],       # Extended
+            'v_5': [0, 4, 8, 12, 20],        # Wide spread
+            'v_6': [0, 4, 8, 12, 14, 16]     # With 9th
+        }
+        
+        # Minor major 7th voicings
+        self.m_maj7 = {
+            'v_0': [0, 11, 15, 19],          # Drop 2 m(maj7)
+            'v_1': [0, 7, 11, 15],           # Root-fifth-maj7-m3
+            'v_2': [0, 7, 11, 14, 15],       # Close voicing
+            'v_3': [0, 3, 7, 11, 15],        # Complete closed
+            'v_4': [0, 7, 11, 15, 19],       # Balanced
+            'v_5': [0, 7, 11, 14, 15, 19],   # Extended
+            'v_6': [0, 7, 11, 14, 15, 22]    # With 9th
+        }
+        
+        # Major 6th voicings
+        self.maj6 = {
+            'v_0': [0, 7, 9, 16],            # Drop 2 maj6
+            'v_1': [0, 9, 16, 19],           # Open maj6
+            'v_2': [0, 4, 7, 9, 12],         # Closed maj6
+            'v_3': [0, 7, 9, 12, 16],        # Complete
+            'v_4': [0, 7, 9, 14, 16],        # Extended
+            'v_5': [0, 7, 9, 12, 16, 19],    # Full voicing
+            'v_6': [0, 4, 7, 9, 14, 16]      # With 9th
+        }
+        
+        # Minor 6th voicings
+        self.m6 = {
+            'v_0': [0, 7, 9, 15],            # Drop 2 m6
+            'v_1': [0, 9, 15, 19],           # Open m6
+            'v_2': [0, 3, 7, 9, 15],         # Closed m6
+            'v_3': [0, 7, 9, 12, 15],        # Complete
+            'v_4': [0, 7, 9, 15, 19],        # Balanced
+            'v_5': [0, 7, 9, 12, 15, 19],    # Extended
+            'v_6': [0, 3, 7, 9, 14, 15]      # With 9th
+        }
+        
+        # Diminished major 7th voicings
+        self.o_maj7 = {
+            'v_0': [0, 11, 15, 18],          # Drop 2 o(maj7)
+            'v_1': [0, 6, 11, 15],           # Root-dim5-maj7-m3
+            'v_2': [0, 6, 11, 15, 18],       # Complete
+            'v_3': [0, 3, 6, 11, 15],        # Closed
+            'v_4': [0, 6, 11, 14, 15],       # Balanced
+            'v_5': [0, 6, 11, 15, 18, 22],   # Extended
+            'v_6': [0, 6, 11, 12, 15, 18]    # Full voicing
+        }
+        
+        # Power chord voicings
+        self.power = {
+            'v_0': [0, 7, 12],               # Basic power chord
+            'v_1': [0, 7, 12, 19],           # Extended power
+            'v_2': [0, 7, 12, 24],           # Wide power
+            'v_3': [0, 7, 12, 19, 24],       # Full power
+            'v_4': [0, 12, 19],              # Octave power
+            'v_5': [0, 7, 19],               # Open power
+            'v_6': [0, 7, 12, 19, 26]        # Extended octave power
+        }
+        
+        # No chord (silence)
+        self.noChord = {
+            'v_0': [0, 0, 0, 0], 'v_1': [0, 0, 0, 0], 'v_2': [0, 0, 0, 0],
+            'v_3': [0, 0, 0, 0], 'v_4': [0, 0, 0, 0], 'v_5': [0, 0, 0, 0],
+            'v_6': [0, 0, 0, 0]
+        }
                
         #TODO: define voicing for guitar
         
@@ -254,7 +457,7 @@ class Voicing:
     def convert_chords_to_voicing(self, sequence):
         midi_sequence = []
         root = 0
-        mod = 3
+        mod = 7  # Use 7 voicing templates for better variety and voice leading
         status = True
         # Create a dictionary for the alter section
         add_dict = {
@@ -415,6 +618,157 @@ class Voicing:
     
     
     #--------------------------------------------------------------------------------
+    # Advanced voice leading methods inspired by modal_studio_Chord.js
+    #--------------------------------------------------------------------------------
+    
+    def select_voicing_by_position(self, position):
+        """
+        Select voicing template based on chord position in progression.
+        Similar to selectVoicingBasedOnFunction in modal_studio_Chord.js
+        
+        Args:
+            position: Position in sequence (0-6 maps to v_0 through v_6)
+        
+        Returns:
+            Voicing key string ('v_0' through 'v_6')
+        """
+        voicing_index = position % 7
+        return f'v_{voicing_index}'
+    
+    def optimize_voice_leading(self, current_voicing, next_voicing, root_current, root_next):
+        """
+        Optimize voice leading between two chords to minimize movement.
+        Inspired by checkAndAddNinth and voice leading logic in modal_studio_Chord.js
+        
+        Args:
+            current_voicing: List of MIDI notes for current chord
+            next_voicing: List of MIDI notes for next chord  
+            root_current: Root note of current chord
+            root_next: Root note of next chord
+            
+        Returns:
+            Optimized next_voicing with adjusted octaves for smooth voice leading
+        """
+        if not current_voicing or not next_voicing:
+            return next_voicing
+        
+        # Work with non-zero notes only
+        current_notes = [n for n in current_voicing if n != 0]
+        next_notes = [n for n in next_voicing if n != 0]
+        
+        if not current_notes or not next_notes:
+            return next_voicing
+        
+        # Optimize each voice to stay close to previous chord
+        optimized = []
+        for next_note in next_notes:
+            # Find closest version of this note to any note in current chord
+            best_note = next_note
+            min_distance = float('inf')
+            
+            for current_note in current_notes:
+                # Try this note and its octave transpositions
+                for octave_shift in [-12, 0, 12]:
+                    candidate = next_note + octave_shift
+                    distance = abs(candidate - current_note)
+                    
+                    if distance < min_distance:
+                        min_distance = distance
+                        best_note = candidate
+            
+            optimized.append(best_note)
+        
+        # Pad with zeros to match original length
+        while len(optimized) < len(next_voicing):
+            optimized.append(0)
+            
+        return optimized
+    
+    def add_extensions_for_quality(self, voicing, chord_type, root):
+        """
+        Add chord extensions (9th, 11th, 13th) based on chord quality.
+        Inspired by the upperNinth logic in modal_studio_Chord.js
+        
+        Args:
+            voicing: Base voicing as list of intervals from root
+            chord_type: Chord quality (e.g., 'maj7', 'm7', 'dom7')
+            root: Root note MIDI number
+            
+        Returns:
+            Extended voicing with appropriate color tones
+        """
+        extended = voicing.copy()
+        
+        # Add 9th for certain chord types (common in jazz)
+        if chord_type in ['maj7', 'm7', 'dom7', 'sus7', 'm_maj7']:
+            # Add 9th (14 semitones from root) in upper register if not too crowded
+            if len(extended) < 6:
+                ninth = 14  # 9th interval
+                if ninth not in extended:
+                    extended.append(ninth)
+        
+        # Add 11th for sus chords
+        if chord_type in ['sus7', 'sus4']:
+            if len(extended) < 6:
+                eleventh = 17  # 11th interval  
+                if eleventh not in extended:
+                    extended.append(eleventh)
+        
+        # Add 13th for dominant and major chords
+        if chord_type in ['dom7', 'maj7'] and len(extended) < 7:
+            thirteenth = 21  # 13th interval
+            if thirteenth not in extended:
+                extended.append(thirteenth)
+        
+        return extended
+    
+    def get_drop_2_voicing(self, base_voicing):
+        """
+        Create a drop-2 voicing from a closed voicing.
+        Drop-2 voicings are essential in jazz for better voice leading.
+        
+        Args:
+            base_voicing: List of intervals in closed position
+            
+        Returns:
+            Drop-2 voicing (second-highest note dropped an octave)
+        """
+        if len(base_voicing) < 3:
+            return base_voicing
+        
+        drop2 = base_voicing.copy()
+        # Drop the second note from the top down an octave
+        if len(drop2) >= 2:
+            drop2[-2] = drop2[-2] - 12
+        
+        # Re-sort to maintain ascending order
+        drop2.sort()
+        return drop2
+    
+    def get_drop_3_voicing(self, base_voicing):
+        """
+        Create a drop-3 voicing from a closed voicing.
+        
+        Args:
+            base_voicing: List of intervals in closed position
+            
+        Returns:
+            Drop-3 voicing (third-highest note dropped an octave)
+        """
+        if len(base_voicing) < 4:
+            return base_voicing
+        
+        drop3 = base_voicing.copy()
+        # Drop the third note from the top down an octave
+        if len(drop3) >= 3:
+            drop3[-3] = drop3[-3] - 12
+        
+        # Re-sort to maintain ascending order
+        drop3.sort()
+        return drop3
+    
+    
+    #--------------------------------------------------------------------------------
     #Export the file to MIDI
     def export_to_midi(self, sequence, filename, path = "../dataset/midi_files/"):
         #Capture the information
@@ -506,24 +860,14 @@ class Voicing:
         if len(ms) == 1:
             ms = '0' + str(stockholm_now.second)
             
-        ext =  mh + mm + ms + '_' +str(stockholm_now.day) + '_' + str(stockholm_now.month) + '_' + str(stockholm_now.year) + '_'
-        
-        fullname = path + ext + filename + '.mid'
-        currentName = ext + filename + '.mid'
+        fullname = path + filename + '.mid'
+        currentName = filename + '.mid'
         
         with open(fullname, "wb") as output_file:
             MyMIDI.writeFile(output_file)
         
-        #Save sequence as text file
-        textFileName = ext + filename + '.txt'
-        with open(path + textFileName, 'w') as file:
-            for item in sequence:
-                file.write("%s\n" % str(item))
-
-        print('song:', currentName) 
-        print('file:', textFileName)
-        print("MIDI file created!", '\n---------------------------------')
-        return currentName
+        print('✓ MIDI file created:', currentName) 
+        return fullname
         
         
     #--------------------------------------------------------------------------------
