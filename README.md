@@ -249,24 +249,6 @@ Train transformer model on hybrid 12-TET/53-TET sequences.
 
 ---
 
-## 🎵 Key Technologies
-
-- **Music21** / **mido**: MIDI manipulation
-- **PyTorch**: Model training
-- **iReal Pro**: Source chord chart format
-- **MPE (MIDI Polyphonic Expression)**: Per-note pitch bend
-- **53-TET**: Microtonal tuning system
-- **EigenSpace**: Dissonance-based harmonic navigation
-
----
-
-## 📖 References
-
-- 53-TET tuning system and EigenSpace theory
-- Modal studio voicing techniques
-- Transformer models for music generation
-- MIDI Polyphonic Expression (MPE) specification
-
 ## License
 This project is licensed under the **Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)**.
 For more details, see the full license at [Creative Commons CC BY-NC 4.0](https://creativecommons.org/licenses/by-nc/4.0/).
