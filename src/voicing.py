@@ -473,229 +473,154 @@ class Voicing:
     
     #-----------------------------------------------------------------------
     # Add the voicing to the sequence
+    # DOT (.) = START of chord. Everything until next DOT is ONE chord.
+    # Structure: . duration root nature [extensions] [/ bass]
     def convert_chords_to_voicing(self, sequence):
         midi_sequence = []
-        root = 0
-        mod = 7  # Use 7 voicing templates for better variety and voice leading
+        mod = 7
         status = True
-        previous_voicing = None  # Track previous chord voicing for voice leading
-        # Create a dictionary for the alter section
+        previous_voicing = None
+        
         add_dict = {
-            'add b13': 8 + 12,
-            'add 13': 9 + 12, 
-            'add #11': 6 + 12,
-            'add 11': 6 + 11,
-            'add #9': 3 + 12,
-            'add 9': 2 + 12,
-            'add b9': 1 + 12,
-            'add 8': 12,
-            'add 7': 11,
-            'add #7': 11,
-            'add 6': 9,
-            'add b6': 8 + 12,
-            'add 5': 7,
-            'add b5': 6,
-            'add 2': 2 + 12,
-            'add b2': 1
+            'add b13': 8 + 12, 'add 13': 9 + 12, 'add #11': 6 + 12, 'add 11': 6 + 11,
+            'add #9': 3 + 12, 'add 9': 2 + 12, 'add b9': 1 + 12, 'add 8': 12,
+            'add 7': 11, 'add #7': 11, 'add 6': 9, 'add b6': 8 + 12,
+            'add 5': 7, 'add b5': 6, 'add 2': 2 + 12, 'add b2': 1
         }
-        # Create a dictionary for the alter section
         alter_dict = {
-            'alter b9': 2,
-            'alter #9': 2,
-            'alter b5': 7,
-            'alter #5': 7,
-            'alter #7': 11,
-            'alter #11': 5
+            'alter b9': 2, 'alter #9': 2, 'alter b5': 7,
+            'alter #5': 7, 'alter #7': 11, 'alter #11': 5
         }
         
-        midi = [0, 0, 0, 0, 0, 0, 0, 0]
-        duration = 0.0
-        chord_label = ''  # Track what we're building
+        # Find all DOT positions - each DOT starts exactly ONE chord
+        dot_positions = [i for i, elem in enumerate(sequence) if elem == '.']
         
-        #check the chord info
-        for i, element in enumerate(sequence):
+        for dot_idx, dot_pos in enumerate(dot_positions):
+            # Find the END of this chord (next DOT or end of sequence)
+            if dot_idx + 1 < len(dot_positions):
+                end_pos = dot_positions[dot_idx + 1]
+            else:
+                end_pos = len(sequence)
             
-            #Check it is a dot ----------------------------------------------------
-            if element == '.' and i < len(sequence) - 2:
-                # NEW CHORD STARTS - save previous chord if it exists
-                if chord_label != '':
-                    # Append the complete chord we built
-                    couple = (midi.copy(), duration, chord_label)
-                    midi_sequence.append(couple)
-                
-                # Reset for new chord
-                duration = float(sequence[i+1])
-                midi = [0, 0, 0, 0, 0, 0, 0, 0]
-                chord_label = ''
+            # Extract chord tokens between this DOT and next DOT
+            chord_tokens = sequence[dot_pos:end_pos]
             
-            elif element in self.durations:
-                duration = float(element)
-                # Don't append here - just update duration
-                
-            #check notes ------------------------------------------------------------
-            elif element in self.all_notes and sequence[i-1] != '/':
-                root = self.all_notes[element]
-                midi = [root, 0, 0, 0, 0, 0, 0, 0]
-                chord_label = element  # Start building chord label
-                # Don't append yet - wait for nature
+            # Parse this ONE chord
+            duration = 0.0
+            root = 0
+            midi = [0, 0, 0, 0, 0, 0, 0, 0]
+            chord_label = ''
+            has_slash = False
+            slash_bass = None
             
-            # Nature section --------------------------------------------------------
-            elif element in self.natures:
-                # Try all 7 voicing templates and select the one with best voice leading
-                all_voicings = []
-                for template_idx in range(mod):
-                    template_voicing = [x + root for x in self.chord_voicing[element][self.voicing[template_idx]]]
-                    all_voicings.append(template_voicing)
-                
-                # Select voicing with minimum voice movement from previous chord
-                if previous_voicing is not None:
-                    midi = self.select_best_voicing(previous_voicing, all_voicings)
-                else:
-                    # First chord - use v_0
-                    midi = all_voicings[0]
-                
-                previous_voicing = [n for n in midi if n != 0]  # Store for next iteration
-                chord_label = element  # Update label with nature
-                # Don't append yet - extensions might follow
-            
-            # Add section --------------------------------------------------------      
-            elif element in add_dict:
-                new_note = root + add_dict[element]
-                if new_note not in midi:
-                    # Find first empty slot
-                    for idx in range(len(midi)):
-                        if midi[idx] == 0:
-                            midi[idx] = new_note
-                            break
-                      
-                if element == 'add b9' or element == 'add #9':
-                    #check if the 9 is in the chord
-                    if (root + 14) in midi:
-                        index = midi.index(root + 14)
-                        midi[index] = 0
-                    elif (root + 26) in midi:
-                        index = midi.index(root + 26)
-                        midi[index] = 0
-                
-                # Don't append - just modify midi
-                
-            # Alter section --------------------------------------------------------            
-            elif element in alter_dict:
-                my_ref = [x for x in midi if x > 0 and (x - root) % 12 == alter_dict[element]]
-                
-                if len(my_ref) == 1:
-                    loc = midi.index(my_ref[0])
-                    if element.find('b') != -1:
-                        midi[loc] = my_ref[0] - 1
-                    elif element.find('#') != -1:
-                        midi[loc] = my_ref[0] + 1
+            for j, token in enumerate(chord_tokens):
+                if token == '.':
+                    continue
+                    
+                elif token in self.durations:
+                    duration = float(token)
+                    
+                elif token in self.all_notes and (j == 0 or chord_tokens[j-1] != '/'):
+                    # This is the ROOT note (not slash bass)
+                    root = self.all_notes[token]
+                    midi = [root, 0, 0, 0, 0, 0, 0, 0]
+                    chord_label = token
+                    
+                elif token in self.natures:
+                    # Get voicing for this chord nature
+                    all_voicings = []
+                    for template_idx in range(mod):
+                        template_voicing = [x + root for x in self.chord_voicing[token][self.voicing[template_idx]]]
+                        all_voicings.append(template_voicing)
+                    
+                    if previous_voicing is not None:
+                        midi = self.select_best_voicing(previous_voicing, all_voicings)
+                    else:
+                        midi = all_voicings[0]
+                    
+                    chord_label = token
+                    
+                elif token in add_dict:
+                    new_note = root + add_dict[token]
+                    if new_note not in midi:
+                        for idx in range(len(midi)):
+                            if midi[idx] == 0:
+                                midi[idx] = new_note
+                                break
+                    if token == 'add b9' or token == 'add #9':
+                        if (root + 14) in midi:
+                            midi[midi.index(root + 14)] = 0
+                        elif (root + 26) in midi:
+                            midi[midi.index(root + 26)] = 0
+                            
+                elif token in alter_dict:
+                    my_ref = [x for x in midi if x > 0 and (x - root) % 12 == alter_dict[token]]
+                    if len(my_ref) >= 1:
+                        for n in my_ref:
+                            loc = midi.index(n)
+                            if 'b' in token:
+                                midi[loc] = n - 1
+                            elif '#' in token:
+                                midi[loc] = n + 1
+                    elif len(my_ref) == 0:
+                        new_note = root + alter_dict[token]
+                        if 'b' in token:
+                            new_note -= 1
+                        elif '#' in token:
+                            new_note += 1
+                        for idx in range(len(midi)):
+                            if midi[idx] == 0:
+                                midi[idx] = new_note
+                                break
+                                
+                elif token == '/':
+                    has_slash = True
+                    
+                elif has_slash and token in self.all_notes:
+                    # Slash bass note - modify the chord
+                    # Get the bass note in a LOW octave (octave 2, around MIDI 36-47)
+                    bass_pitch_class = self.all_notes[token] % 12
+                    slash_bass = 36 + bass_pitch_class  # Put bass in octave 2
+                    
+                    # Get non-zero notes from current voicing
+                    notes = [x for x in midi if x > 0]
+                    
+                    if len(notes) > 0:
+                        # Find the original root (by pitch class, not just lowest note)
+                        root_pitch_class = root % 12
                         
-                elif len(my_ref) > 1:
-                    for n in my_ref:
-                        loc = midi.index(n)
-                        if element.find('b') != -1:
-                            midi[loc] = n - 1
-                        elif element.find('#') != -1:
-                            midi[loc] = n + 1 
-                
-                elif len(my_ref) == 0:
-                    new_note = root + alter_dict[element]
-                    if element.find('b') != -1:
-                        new_note -= 1
-                    elif element.find('#') != -1:
-                        new_note += 1
-                    # Add to first empty slot
-                    for idx in range(len(midi)):
-                        if midi[idx] == 0:
-                            midi[idx] = new_note
-                            break
-                
-                # Don't append - just modify midi
-                
-            # Slash section --------------------------------------------------------    
-            elif element == '/':
-                # Mark that a slash is coming - save current chord and prepare for slash bass
-                if chord_label != '':
-                    couple = (midi.copy(), duration, chord_label)
-                    midi_sequence.append(couple)
-                    chord_label = ''
-                
-                # Append slash marker
-                thisMidi = [0, 0, 0, 0, 0, 0, 0, 0]
-                info = (thisMidi, duration, element)
-                midi_sequence.append(info)
-                
-            # New root after slash section -----------------------------------------  
-            elif sequence[i-1] == '/' and element in self.all_notes:
-                # Slash chord: Take the current chord voicing, move old root up octave, add new bass
-                slash_bass = self.all_notes[element]
-                
-                # Start with current chord voicing (non-zero notes only)
-                midiInfo = [x for x in midi if x > 0]
-                
-                # Find and REMOVE the old root (lowest note)
-                if len(midiInfo) > 0:
-                    old_root = min(midiInfo)  # Get the actual lowest note
+                        # Remove any note with same pitch class as new bass (to avoid duplicates)
+                        bass_pitch = slash_bass % 12
+                        notes = [x for x in notes if x % 12 != bass_pitch]
+                        
+                        # Ensure all remaining notes are ABOVE the bass
+                        adjusted_notes = []
+                        for n in notes:
+                            while n <= slash_bass:
+                                n += 12
+                            adjusted_notes.append(n)
+                        
+                        # Sort and rebuild: bass first, then rest ascending
+                        adjusted_notes = sorted(adjusted_notes)
+                        notes = [slash_bass] + adjusted_notes
+                    else:
+                        notes = [slash_bass]
                     
-                    # Remove ALL occurrences of the old root from the voicing
-                    midiInfo = [x for x in midiInfo if x != old_root]
-                    
-                    # ALSO remove the new bass note if it already exists in the chord
-                    # (e.g., G7/D where D is the 5th of G7)
-                    midiInfo = [x for x in midiInfo if x != slash_bass]
-                    
-                    # Add the old root back, moved up one octave
-                    midiInfo.insert(0, old_root + 12)
-                    
-                    # Insert the new bass note at the very beginning
-                    midiInfo.insert(0, slash_bass)
-                else:
-                    # No chord voicing - just add the bass
-                    midiInfo.insert(0, slash_bass)
-                
-                # Pad to 8 notes
-                while len(midiInfo) < 8:
-                    midiInfo.append(0)
-                
-                # Append the slash chord
-                info = (midiInfo, duration, element)
-                midi_sequence.append(info)
-                
-                # Update midi and previous_voicing for subsequent operations
-                midi = midiInfo
-                previous_voicing = [x for x in midiInfo if x > 0]
-                chord_label = ''  # Reset
+                    # Rebuild midi array
+                    midi = notes + [0] * (8 - len(notes))
+                    chord_label = token  # Label is the bass note
             
-            # Structural elements section ---------------------------------------------
-            elif element in self.structural_elements and element != '/':
-                # Save current chord if exists
-                if chord_label != '':
-                    couple = (midi.copy(), duration, chord_label)
-                    midi_sequence.append(couple)
-                    chord_label = ''
-                
-                # Append structural marker
-                thisMidi = [0, 0, 0, 0, 0, 0, 0, 0]
-                couple = (thisMidi, duration, element)
-                midi_sequence.append(couple)
-                
-            # Form section -------------------------------------------------------------
-            elif element not in self.all_notes and element not in self.natures and element not in self.structural_elements and element not in self.durations:
-                # Save current chord if exists
-                if chord_label != '':
-                    couple = (midi.copy(), duration, chord_label)
-                    midi_sequence.append(couple)
-                    chord_label = ''
-                
-                # Append form marker
-                thisMidi = [0, 0, 0, 0, 0, 0, 0, 0]
-                couple = (thisMidi, duration, element)
-                midi_sequence.append(couple)
-        
-        # Don't forget the last chord!
-        if chord_label != '':
-            couple = (midi.copy(), duration, chord_label)
-            midi_sequence.append(couple)
+            # NOW append exactly ONE chord for this DOT
+            # Pad midi to 8 if needed
+            while len(midi) < 8:
+                midi.append(0)
+            midi = midi[:8]
+            
+            # Only append if we have actual notes
+            note_count = len([n for n in midi if n > 0])
+            if note_count > 0:
+                midi_sequence.append((midi.copy(), duration, chord_label))
+                previous_voicing = [n for n in midi if n > 0]
         
             
         #Normalize the length of the MIDI sequence to 8 ----------------------------
@@ -1136,94 +1061,47 @@ class Voicing:
         """
         Export sequence to MIDI file.
         
-        CORRECT LOGIC: Extract chord voicings based on their labels.
-        - Chord natures (min7, dom7, maj7, etc.) contain the full voicings
-        - Slash chords are labeled with note names after '/' marker
-        - Skip structural elements (dots, pipes, durations)
+        SIMPLE: The sequence now contains ONLY chords (one per DOT).
+        Each element is (midi_array, duration, label).
+        Just export all of them in order.
         """
-        midi_capture = []
-        
-        # Extract all real chord voicings from the sequence
-        for i, (midi, duration, label) in enumerate(sequence):
-            # Skip empty MIDI data
-            if midi == [0, 0, 0, 0, 0, 0, 0, 0]:
-                continue
-            
-            # Check if this is a chord nature (min7, dom7, maj7, sus, etc.)
-            # OR a slash chord bass note (appears after '/' marker)
-            if label in self.natures:
-                # This is a full chord with a nature label
-                midi_capture.append((midi, duration))
-            elif len([n for n in midi if n > 0]) >= 3:
-                # This has 3+ notes - likely a slash chord or modified chord
-                # Check if previous element was a slash
-                if i > 0 and sequence[i-1][2] == '/':
-                    midi_capture.append((midi, duration))
-        
-        #check distances and correct them
-        for i, midiChord in enumerate(midi_capture):
-            if i < len(midi_capture) - 1:
-                currentMidi = midiChord[0]
-           
-                nextMidi = midi_capture[i+1][0]
-                #calculate the distance between each note of the chords
-                distance = [0, 0, 0, 0, 0, 0, 0, 0]
-                for j in range(1, 4):
-                    distance[j] = currentMidi[j] - nextMidi[j]
-                    if distance[j] <= -12:
-                        nextMidi[j] = nextMidi[j] - 12
-                        break
-                # for j in range(4):
-                #     distance[j] = currentMidi[j] - nextMidi[j]
-                #     if distance[j] >= 12:
-                #         nextMidi[j] = nextMidi[j] + 12
-                #         break
-                    
-                #print(i, 'distance:', distance, currentMidi, nextMidi)
-                
         # Create a MIDI file
         track    = 0
         channel  = 0
-        time     = 0    # In beats
         tempo    = 120   # In BPM
-        volume   = 80  # 0-127, as per the MIDI standard
 
-        MyMIDI = MIDIFile()  # One track, defaults to format 1 (tempo track is created automatically)
-        MyMIDI.addTempo(track, time, tempo)
+        MyMIDI = MIDIFile()
+        MyMIDI.addTempo(track, 0, tempo)
 
-        time = 0
+        time = 0  # Start time in beats
         
-        for item in midi_capture:
-            m = item[0]
-            #clean the values that are zero
-            m = [x for x in m if x != 0]
-            d = float(item[1])
+        for item in sequence:
+            midi_notes = item[0]
+            duration = float(item[1])
             
-            for i, pitch in enumerate(m):
+            # Get non-zero notes
+            notes = [n for n in midi_notes if n > 0]
+            
+            # Skip if no notes
+            if len(notes) == 0:
+                continue
+            
+            # Convert duration from seconds to beats
+            # At 120 BPM: 1 second = 2 beats
+            duration_in_beats = duration * (tempo / 60.0)
+            
+            for pitch in notes:
                 volume = int(random.uniform(55, 85))
-                MyMIDI.addNote(track, channel, pitch, time, d, volume)
-            time += d
-  
-        tz = pytz.timezone('Europe/Stockholm')
-        stockholm_now = datetime.now(tz)
-        mh = str(stockholm_now.hour)
-        mm = str(stockholm_now.minute)
-        ms = str(stockholm_now.second)
-        
-        if len(mh) == 1:
-            mh = '0' + str(stockholm_now.hour)
-        if len(mm) == 1:
-            mm= '0' + str(stockholm_now.minute)
-        if len(ms) == 1:
-            ms = '0' + str(stockholm_now.second)
+                MyMIDI.addNote(track, channel, pitch, time, duration_in_beats, volume)
             
+            time += duration_in_beats
+  
         fullname = path + filename + '.mid'
-        currentName = filename + '.mid'
         
         with open(fullname, "wb") as output_file:
             MyMIDI.writeFile(output_file)
         
-        print('✓ MIDI file created:', currentName) 
+        print('✓ MIDI file created:', filename + '.mid') 
         return fullname
         
         

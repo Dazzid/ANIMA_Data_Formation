@@ -489,79 +489,62 @@ class MPE_MIDI_Exporter:
     
     def export_to_mpe_midi(self, midi_voicing_data, filename, output_path='./'):
         """
-        Export MIDI voicing data to MPE-formatted MIDI file
+        Export MIDI voicing data to MPE-formatted MIDI file.
+        
+        SIMPLE APPROACH: The sequence from convert_chords_to_voicing() now contains
+        ONLY chords (one per DOT). Each element is (midi_array, duration, label).
+        Just export all of them in order - no complex DOT-search logic needed!
         
         Args:
             midi_voicing_data: List of 3-tuples [(midi_notes_array, duration, chord_name), ...]
             filename: Output filename
             output_path: Directory to save file
         """
+        import random
+        
         # Create MIDI file with 1 track
         midi = MIDIFile(1, adjust_origin=False)
         track = 0
-        tempo = 120
+        tempo = 120  # BPM
         
         midi.addTempo(track, 0, tempo)
         
         # Setup MPE channels
         self.setup_mpe_channels(midi)
         
-        # Process sequence to extract actual chord events (following dot logic from voicing.py)
-        midi_capture = []
-        structural_elements = {'.', '|', ':|', '|:', '/', 'N.C.', '<end>'}
-        
-        for i, element in enumerate(midi_voicing_data):
-            chord_name = element[2]
-            
-            # Dots indicate chord positions - look ahead to find the complete chord
-            if chord_name == '.' and i < len(midi_voicing_data) - 2:
-                ref = i
-                counter = 0
-                doIt = True
-                
-                # Look ahead to find the actual chord (skip duration tokens, etc.)
-                while doIt and ref < len(midi_voicing_data) - 1:
-                    counter += 1
-                    ref += 1
-                    next_chord = midi_voicing_data[ref][2]
-                    
-                    # Stop when hitting structural elements or form markers
-                    if next_chord in structural_elements or next_chord.startswith('Form_'):
-                        doIt = False
-                        counter -= 1
-                
-                # Found the complete chord - use its MIDI data with the dot's duration
-                if counter > 0:
-                    chord_midi = midi_voicing_data[i + counter][0]
-                    chord_duration = element[1]  # Use dot's duration
-                    
-                    # Filter out N.C. chords and empty MIDI
-                    if chord_midi != [0, 0, 0, 0, 0, 0, 0, 0] and chord_midi != [48, 48, 48, 48, 0, 0, 0, 0]:
-                        midi_capture.append((chord_midi, chord_duration))
-        
-        # Export captured chords to MPE MIDI
+        # Export all chords directly - no complex filtering needed!
         current_time = 0.0
         
-        for midi_notes, duration in midi_capture:
-            # Filter out zero values (rests/structural elements)
+        for item in midi_voicing_data:
+            midi_notes = item[0]
+            duration = float(item[1])
+            
+            # Get non-zero notes
             active_notes = [note for note in midi_notes if note > 0]
             
-            if len(active_notes) > 0:
-                # Add each note to a separate MPE channel
-                for note in active_notes:
-                    channel = self.get_next_channel()
-                    velocity = 100
-                    
-                    # Add note on MPE channel
-                    midi.addNote(track=track, 
-                               channel=channel, 
-                               pitch=int(note), 
-                               time=current_time, 
-                               duration=duration, 
-                               volume=velocity)
+            # Skip if no notes
+            if len(active_notes) == 0:
+                continue
+            
+            # Convert duration from seconds to beats
+            # At 120 BPM: 1 second = 2 beats
+            duration_in_beats = duration * (tempo / 60.0)
+            
+            # Add each note to a separate MPE channel
+            for note in active_notes:
+                channel = self.get_next_channel()
+                velocity = int(random.uniform(55, 85))
+                
+                # Add note on MPE channel
+                midi.addNote(track=track, 
+                           channel=channel, 
+                           pitch=int(note), 
+                           time=current_time, 
+                           duration=duration_in_beats, 
+                           volume=velocity)
             
             # Advance time
-            current_time += duration
+            current_time += duration_in_beats
         
         # Write MIDI file
         full_path = f"{output_path}/{filename}.mid"

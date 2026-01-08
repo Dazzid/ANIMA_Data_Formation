@@ -313,88 +313,108 @@ def parse_info_from_XML(path, verbose = False):
                         the_chord_sequence.append(rep)
                         the_duration_sequence.append(duration)
                             
-            #get the chords
-            for harmony in measure.iter('harmony'):
-                root = harmony.find('root')
-                note = root.find('root-step')
-                sharp = root.find('root-alter')
-                kind = harmony.find('kind')
-                bass = harmony.find('bass')
-                
-                if sharp != None:
-                    sharp = sharp.text
-                    if sharp == '-1': #Remember to check double sharp and double flat
-                        tone = 'b'
-                    elif sharp == '1':
-                        tone = '#'
-                    elif sharp == '0':
-                        tone = ''
-                
-                note = note.text+tone
-                #nature = kind.attrib.get('text')
-                #get the nature from kind
-                nature = kind.text
-                #print('bar:', measure_number, 'r:', note, 'n:', nature)
-                
-                #get nature of the chord
-                if nature == None:
-                    nature = ''
-                
-                #get the extension
-                degree = harmony.find('degree')
-                extension = ''
-                if degree != None:
-                    for degree in measure.iter('degree'):
-                        
-                        degree_type = degree.find('degree-type').text
-                        relatedNote = degree.find('degree-value').text
-                        degree_sharp = degree.find('degree-alter').text
-                        if degree_sharp == '-1':
-                            relatedNote = 'b'+relatedNote
-                        elif degree_sharp == '-2':
-                            relatedNote = 'bb'+relatedNote
-                        elif degree_sharp == '1':
-                            relatedNote = '#'+relatedNote
-                        elif degree_sharp == '2':
-                            relatedNote = '##'+relatedNote
-                            
-                        extension += ' ' + degree_type + ' ' +relatedNote
-                else:
-                    extension = ''
-                
-                #----------------------------------------------------------
-                #get slash chord and its alterations
-                if bass != None:
-                    bass_step = bass.find('bass-step').text
-                    #print(bass_step)
-                    bass_alter = bass.find('bass-alter')
-                    if bass_alter != None:
-                        bass_alter = int(bass_alter.text)
-                        #print(bass_alter)
-                        if bass_alter == 1:
-                            bass_note = bass_step + '#'
-                        elif bass_alter == -1:
-                            bass_note = bass_step + 'b'
-                        elif bass_alter == 2:
-                            bass_note = bass_step + '##'
-                        elif bass_alter == -2:
-                            bass_note = bass_step + 'bb'
-                        slash = '/'+bass_note
-                    else:
-                        slash = '/'+bass_step
-                else:
-                    slash = ''
-                    
-                chord = note + str(nature) + extension + str(slash)
-                #print(chord)
-                the_chord_sequence.append(chord)
-                 
             #----------------------------------------------------------
-            #get durations duration
-            for note_element in measure.iter('note'):
-                duration = int(note_element.find('duration').text) / division
-                #print(duration)
-                the_duration_sequence.append(duration)
+            # FIXED: Process harmony-note pairs together to link durations correctly
+            # Each <harmony> is followed by its <note> which contains the duration
+            #----------------------------------------------------------
+            measure_children = list(measure)
+            child_idx = 0
+            
+            while child_idx < len(measure_children):
+                child = measure_children[child_idx]
+                
+                if child.tag == 'harmony':
+                    harmony = child
+                    root = harmony.find('root')
+                    note = root.find('root-step')
+                    sharp = root.find('root-alter')
+                    kind = harmony.find('kind')
+                    bass = harmony.find('bass')
+                    
+                    tone = ''
+                    if sharp != None:
+                        sharp = sharp.text
+                        if sharp == '-1': #Remember to check double sharp and double flat
+                            tone = 'b'
+                        elif sharp == '1':
+                            tone = '#'
+                        elif sharp == '0':
+                            tone = ''
+                    
+                    note = note.text+tone
+                    #nature = kind.attrib.get('text')
+                    #get the nature from kind
+                    nature = kind.text
+                    #print('bar:', measure_number, 'r:', note, 'n:', nature)
+                    
+                    #get nature of the chord
+                    if nature == None:
+                        nature = ''
+                    
+                    #get the extension
+                    degree = harmony.find('degree')
+                    extension = ''
+                    if degree != None:
+                        for deg in harmony.iter('degree'):  # Use harmony.iter, not measure.iter
+                            degree_type = deg.find('degree-type').text
+                            relatedNote = deg.find('degree-value').text
+                            degree_sharp = deg.find('degree-alter').text
+                            if degree_sharp == '-1':
+                                relatedNote = 'b'+relatedNote
+                            elif degree_sharp == '-2':
+                                relatedNote = 'bb'+relatedNote
+                            elif degree_sharp == '1':
+                                relatedNote = '#'+relatedNote
+                            elif degree_sharp == '2':
+                                relatedNote = '##'+relatedNote
+                                
+                            extension += ' ' + degree_type + ' ' +relatedNote
+                    else:
+                        extension = ''
+                    
+                    #----------------------------------------------------------
+                    #get slash chord and its alterations
+                    if bass != None:
+                        bass_step = bass.find('bass-step').text
+                        #print(bass_step)
+                        bass_alter = bass.find('bass-alter')
+                        if bass_alter != None:
+                            bass_alter = int(bass_alter.text)
+                            #print(bass_alter)
+                            if bass_alter == 1:
+                                bass_note = bass_step + '#'
+                            elif bass_alter == -1:
+                                bass_note = bass_step + 'b'
+                            elif bass_alter == 2:
+                                bass_note = bass_step + '##'
+                            elif bass_alter == -2:
+                                bass_note = bass_step + 'bb'
+                            slash = '/'+bass_note
+                        else:
+                            slash = '/'+bass_step
+                    else:
+                        slash = ''
+                        
+                    chord = note + str(nature) + extension + str(slash)
+                    the_chord_sequence.append(chord)
+                    
+                    #----------------------------------------------------------
+                    # Find the NEXT note element to get this chord's duration
+                    # In MusicXML, <harmony> is followed by its <note>
+                    #----------------------------------------------------------
+                    chord_duration = 0
+                    search_idx = child_idx + 1
+                    while search_idx < len(measure_children):
+                        if measure_children[search_idx].tag == 'note':
+                            dur_elem = measure_children[search_idx].find('duration')
+                            if dur_elem is not None:
+                                chord_duration = int(dur_elem.text) / division
+                            break
+                        search_idx += 1
+                    
+                    the_duration_sequence.append(chord_duration)
+                
+                child_idx += 1
                 
             #this second bar is relevant to close the section
             #Find all barline elements within the measure
