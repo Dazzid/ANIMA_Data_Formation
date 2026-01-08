@@ -1,7 +1,2 @@
 
-# Large dataset files - generated locally
-dataset/formatted/midi_voicing_dataset.txt
-dataset/formatted/dataset_augmented.txt
-*.txt
-
 .DS_Store
