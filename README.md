@@ -102,8 +102,8 @@ Progressive introduction of 53-TET microtonality.
 
 #### 53-TET Substitution Methods
 
-| Method | Approach | Best For |
-|--------|----------|----------|
+| Method    | Approach | Best For |
+|-----------|----------|----------|
 | **Option A** | Pre-map 12-TET → 53-TET equivalents<br/>| Adding familiar sonorities |
 | **Option B** | EigenSpace dissonance distance to move the harmony into other chords | Exploring new harmonic space |
 | **Option C** | Add intermediate chords | (preserves function) |
