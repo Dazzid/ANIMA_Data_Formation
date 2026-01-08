@@ -423,8 +423,10 @@ class Voicing:
                 
             # Slash section --------------------------------------------------------    
             elif element == '/':
-                # Don't append anything - just mark that next note is slash bass
-                pass
+                # Keep sequences aligned - append marker but don't affect voicing
+                # The actual slash bass note will be in the next element
+                thisMidi = [0, 0, 0, 0, 0, 0, 0, 0]
+                midi_sequence.append(thisMidi)
                 
             # New root after slash section -----------------------------------------  
             elif sequence[i-1][0] == '/' and element in self.all_notes:
@@ -597,8 +599,10 @@ class Voicing:
                 
             # Slash section --------------------------------------------------------    
             elif element == '/':
-                # Don't append anything - just mark that next note is slash bass
-                pass
+                # Keep sequences aligned - append marker
+                thisMidi = [0, 0, 0, 0, 0, 0, 0, 0]
+                info = (thisMidi, duration, element)
+                midi_sequence.append(info)
                 
             # New root after slash section -----------------------------------------  
             elif sequence[i-1][0] == '/' and element in self.all_notes:
