@@ -42,10 +42,9 @@ Enhanced `voicing.py` module with 7 voicing templates (`v_0` through `v_6`) per 
 #### What's Been Completed (Notebook: 01_musicXML_parser.ipynb)
 1. ✅ **XML Parsing** - Parse ~4,000 iReal Pro XML files into structured chord progressions
 2. ✅ **Song Structure Expansion** - Expand repeats, codas, and form markers into full sequences
-3. ✅ **Chord Tokenization** - Add 'maj' tokens to single-note symbols for clarity
-4. ✅ **Duration Handling** - Extract and process rhythmic durations from XML
-5. ✅ **MIDI Voicing** - Convert chord symbols to MIDI note arrays using voicing.py
-6. ✅ **Validation** - XML-to-token accuracy verification (~93.4% match rate)
+3. ✅ **Duration Handling** - Extract and process rhythmic durations from XML
+4. ✅ **MIDI Voicing** - Convert chord symbols to MIDI note arrays using voicing.py
+5. ✅ **Validation** - XML-to-token accuracy verification (~93.4% match rate)
 
 **Status**: ✅ Stage 1 Core Complete - Ready for Stage 2 (Transposition)
 
