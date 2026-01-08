@@ -66,57 +66,57 @@ class Voicing:
         
         # Major chord voicings (no 7th, so basic sound = 3 + 5)
         self.maj = {
-            'v_0': [0, 16, 19],              # Root + M3 + P5 (basic triad)
-            'v_1': [0, 16, 19, 24],          # Add octave
-            'v_2': [0, 12, 16, 19],          # Doubled root
-            'v_3': [0, 16, 19, 26],          # Add 9th
-            'v_4': [0, 12, 16, 19, 24],      # Full voicing
-            'v_5': [0, 16, 19, 24, 28],      # Add 9th high
-            'v_6': [0, 14, 16, 19]           # Add 9th color tone
+            'v_0': [0, 4, 7],                # Root + M3 + P5 (basic triad)
+            'v_1': [0, 4, 7, 12],            # Add octave
+            'v_2': [0, 4, 7, 14],            # Add 9th
+            'v_3': [0, 4, 7, 16],            # Add 9th up octave
+            'v_4': [0, 4, 7, 14, 17],        # Add 9th and 11th
+            'v_5': [0, 4, 7, 14, 21],        # Add 9th and 13th
+            'v_6': [0, 4, 7, 11]             # Add major 7th (maj add 7)
         }
         
         # Major 7th voicings (basic sound = 3 + 7)
         self.maj7 = {
-            'v_0': [0, 16, 23],              # Root + M3 + M7 (essential)
-            'v_1': [0, 16, 19, 23],          # Add P5
-            'v_2': [0, 11, 16, 23],          # 7th in bass register
-            'v_3': [0, 16, 23, 26],          # Add 9th
-            'v_4': [0, 14, 16, 23],          # 9th for color
-            'v_5': [0, 16, 19, 23, 26],      # Full with 9th
-            'v_6': [0, 14, 16, 19, 23]       # Complete voicing
+            'v_0': [0, 4, 7, 11],            # Root + M3 + P5 + M7 (complete tetrad)
+            'v_1': [0, 4, 11, 14],           # Root + M3 + M7 + 9 (no 5th)
+            'v_2': [0, 4, 7, 11, 14],        # Add 9th to complete tetrad
+            'v_3': [0, 4, 7, 11, 17],        # Add 11th
+            'v_4': [0, 4, 7, 11, 18],        # Add #11 (lydian)
+            'v_5': [0, 4, 7, 11, 14, 21],    # Full with 9th and 13th
+            'v_6': [0, 4, 7, 11, 14, 18]     # Add 9th and #11
         }
         
         # Minor chord voicings (basic sound = m3 + 5)
         self.m = {
-            'v_0': [0, 15, 19],              # Root + m3 + P5
-            'v_1': [0, 15, 19, 24],          # Add octave
-            'v_2': [0, 12, 15, 19],          # Doubled root
-            'v_3': [0, 15, 19, 26],          # Add 9th
-            'v_4': [0, 12, 15, 19, 24],      # Full voicing
-            'v_5': [0, 15, 19, 24, 26],      # Add 9th high
-            'v_6': [0, 14, 15, 19]           # Add 9th color
+            'v_0': [0, 3, 7],                # Root + m3 + P5 (basic triad)
+            'v_1': [0, 3, 7, 12],            # Add octave
+            'v_2': [0, 3, 7, 14],            # Add 9th
+            'v_3': [0, 3, 7, 15],            # Add 9th up octave
+            'v_4': [0, 3, 7, 14, 17],        # Add 9th and 11th
+            'v_5': [0, 3, 7, 10],            # Add minor 7th (becomes m7)
+            'v_6': [0, 3, 7, 11]             # Add major 7th (m/maj7)
         }
         
         # Minor 7th voicings (basic sound = m3 + b7)
         self.m7 = {
-            'v_0': [0, 15, 22],              # Root + m3 + b7 (essential)
-            'v_1': [0, 15, 19, 22],          # Add P5
-            'v_2': [0, 10, 15, 22],          # 7th in bass register
-            'v_3': [0, 15, 22, 26],          # Add 9th
-            'v_4': [0, 14, 15, 22],          # 9th for color
-            'v_5': [0, 15, 19, 22, 26],      # Full with 9th
-            'v_6': [0, 14, 15, 19, 22]       # Complete voicing
+            'v_0': [0, 3, 7, 10],            # Root + m3 + P5 + b7 (complete tetrad)
+            'v_1': [0, 3, 10, 14],           # Root + m3 + b7 + 9 (no 5th)
+            'v_2': [0, 3, 7, 10, 14],        # Add 9th to complete tetrad
+            'v_3': [0, 3, 7, 10, 17],        # Add 11th
+            'v_4': [0, 3, 7, 10, 14, 17],    # Add 9th and 11th
+            'v_5': [0, 3, 7, 10, 14, 21],    # Add 9th and 13th
+            'v_6': [0, 3, 7, 10, 13]         # Add b9
         }
         
         # Dominant 7th voicings (basic sound = 3 + b7) - MOST IMPORTANT
         self.dom7 = {
-            'v_0': [0, 16, 22],              # Root + M3 + b7 (essential tritone!)
-            'v_1': [0, 16, 19, 22],          # Add P5
-            'v_2': [0, 10, 16, 22],          # 7th in bass register
-            'v_3': [0, 16, 22, 26],          # Add 9th
-            'v_4': [0, 14, 16, 22],          # 9th for color
-            'v_5': [0, 16, 19, 22, 26],      # Full with 9th
-            'v_6': [0, 13, 16, 22]           # Add b9 (altered)
+            'v_0': [0, 4, 7, 10],            # Root + M3 + P5 + b7 (complete tetrad!)
+            'v_1': [0, 4, 10, 14],           # Root + M3 + b7 + 9 (no 5th, add 9)
+            'v_2': [0, 10, 16, 22],          # b7 in bass register, M3 and b7 up octave
+            'v_3': [0, 4, 7, 10, 14],        # Add 9th to complete tetrad
+            'v_4': [0, 4, 7, 10, 17],        # Add 11th
+            'v_5': [0, 4, 10, 14, 21],       # Full with 9th and 13th
+            'v_6': [0, 4, 7, 10, 13]         # Add b9 (altered)
         }
         
         # Half-diminished (ø7) voicings (basic sound = m3 + b5 + b7)
@@ -430,15 +430,27 @@ class Voicing:
                 
             # New root after slash section -----------------------------------------  
             elif sequence[i-1][0] == '/' and element in self.all_notes:
-                # Slash chord: Replace bass note with the slash bass note
-                midiInfo = midi.copy()
+                # Slash chord: Take the current chord voicing, move old root up octave, add new bass
+                # Example: G7/D → G7 chord [43,65,71] becomes [50,55,65,71] (D bass, G+octave, B, F)
                 slash_bass = self.all_notes[element]
                 
-                # Replace the original root with slash bass
+                # Start with current chord voicing
+                midiInfo = [x for x in midi if x > 0]  # Get only non-zero notes
+                
+                # Find the old root (lowest note in current voicing) and move it up one octave
                 if len(midiInfo) > 0:
-                    midiInfo[0] = slash_bass
+                    old_root = midiInfo[0]  # Lowest note is usually the root
+                    midiInfo[0] = old_root + 12  # Move up one octave
+                
+                # Insert the new bass note at the beginning
+                midiInfo.insert(0, slash_bass)
+                
+                # Pad to 8 notes
+                while len(midiInfo) < 8:
+                    midiInfo.append(0)
                 
                 midi_sequence.append(midiInfo)
+                midi = midiInfo  # Update midi so subsequent operations use slashed chord
             
             # Structural elements section ---------------------------------------------
             elif element in self.structural_elements and element != '/':
@@ -498,28 +510,34 @@ class Voicing:
         
         midi = [0, 0, 0, 0, 0, 0, 0, 0]
         duration = 0.0
+        chord_label = ''  # Track what we're building
+        
         #check the chord info
         for i, element in enumerate(sequence):
             
             #Check it is a dot ----------------------------------------------------
             if element == '.' and i < len(sequence) - 2:
+                # NEW CHORD STARTS - save previous chord if it exists
+                if chord_label != '':
+                    # Append the complete chord we built
+                    couple = (midi.copy(), duration, chord_label)
+                    midi_sequence.append(couple)
+                
+                # Reset for new chord
                 duration = float(sequence[i+1])
                 midi = [0, 0, 0, 0, 0, 0, 0, 0]
-                couple = (midi, duration, element)
-                midi_sequence.append(couple)
+                chord_label = ''
             
             elif element in self.durations:
                 duration = float(element)
-                couple = (midi, duration, element)
-                midi_sequence.append(couple)
+                # Don't append here - just update duration
                 
             #check notes ------------------------------------------------------------
-            elif element in self.all_notes and sequence[i-1][0] != '/':
+            elif element in self.all_notes and sequence[i-1] != '/':
                 root = self.all_notes[element]
                 midi = [root, 0, 0, 0, 0, 0, 0, 0]
-                couple = (midi, duration, element)
-                midi_sequence.append(couple)
-                #print(element, sequence[i-1][0]) 
+                chord_label = element  # Start building chord label
+                # Don't append yet - wait for nature
             
             # Nature section --------------------------------------------------------
             elif element in self.natures:
@@ -537,53 +555,48 @@ class Voicing:
                     midi = all_voicings[0]
                 
                 previous_voicing = [n for n in midi if n != 0]  # Store for next iteration
-                
-                #print('chord:', element, midi)
-                infoMidi = midi.copy()
-                couple = (infoMidi, duration, element)
-                midi_sequence.append(couple)
+                chord_label = element  # Update label with nature
+                # Don't append yet - extensions might follow
             
             # Add section --------------------------------------------------------      
             elif element in add_dict:
-                #print('original', midi)
                 new_note = root + add_dict[element]
-                midiInfo = midi.copy()    
-                if new_note not in midiInfo:
-                    midiInfo.append(new_note)
+                if new_note not in midi:
+                    # Find first empty slot
+                    for idx in range(len(midi)):
+                        if midi[idx] == 0:
+                            midi[idx] = new_note
+                            break
                       
                 if element == 'add b9' or element == 'add #9':
                     #check if the 9 is in the chord
-                    if (root + 14) in midiInfo:
-                        index = midiInfo.index(root + 14)
-                        midiInfo.pop(index)
-                    elif (root + 26) in midiInfo:
-                        index = midiInfo.index(root + 26)
-                        midiInfo.pop(index)
-                        
-                couple = (midiInfo, duration, element)
-                midi_sequence.append(couple)
-                midi = midiInfo
+                    if (root + 14) in midi:
+                        index = midi.index(root + 14)
+                        midi[index] = 0
+                    elif (root + 26) in midi:
+                        index = midi.index(root + 26)
+                        midi[index] = 0
+                
+                # Don't append - just modify midi
                 
             # Alter section --------------------------------------------------------            
             elif element in alter_dict:
-                #print('original', element, midi)
-                my_ref = [x for x in midi if (x - root) % 12 == alter_dict[element]]
-                midiInfo = midi.copy() 
+                my_ref = [x for x in midi if x > 0 and (x - root) % 12 == alter_dict[element]]
                 
                 if len(my_ref) == 1:
                     loc = midi.index(my_ref[0])
                     if element.find('b') != -1:
-                        midiInfo[loc] = my_ref[0] - 1
+                        midi[loc] = my_ref[0] - 1
                     elif element.find('#') != -1:
-                        midiInfo[loc] = my_ref[0] + 1
+                        midi[loc] = my_ref[0] + 1
                         
                 elif len(my_ref) > 1:
-                    for i, n in enumerate(my_ref):
+                    for n in my_ref:
                         loc = midi.index(n)
-                        if element.find('b') != -1 and (n - root) % 12 == alter_dict[element]:
-                            midiInfo[loc] = n - 1
-                        elif element.find('#') != -1 and (n - root) % 12 == alter_dict[element]:
-                            midiInfo[loc] = n + 1 
+                        if element.find('b') != -1:
+                            midi[loc] = n - 1
+                        elif element.find('#') != -1:
+                            midi[loc] = n + 1 
                 
                 elif len(my_ref) == 0:
                     new_note = root + alter_dict[element]
@@ -591,58 +604,110 @@ class Voicing:
                         new_note -= 1
                     elif element.find('#') != -1:
                         new_note += 1
-                    midiInfo.append(new_note)
-                    
-                couple = (midiInfo, duration, element)
-                midi_sequence.append(couple)
-                #print('result', element, midi)
+                    # Add to first empty slot
+                    for idx in range(len(midi)):
+                        if midi[idx] == 0:
+                            midi[idx] = new_note
+                            break
+                
+                # Don't append - just modify midi
                 
             # Slash section --------------------------------------------------------    
             elif element == '/':
-                # Keep sequences aligned - append marker
+                # Mark that a slash is coming - save current chord and prepare for slash bass
+                if chord_label != '':
+                    couple = (midi.copy(), duration, chord_label)
+                    midi_sequence.append(couple)
+                    chord_label = ''
+                
+                # Append slash marker
                 thisMidi = [0, 0, 0, 0, 0, 0, 0, 0]
                 info = (thisMidi, duration, element)
                 midi_sequence.append(info)
                 
             # New root after slash section -----------------------------------------  
-            elif sequence[i-1][0] == '/' and element in self.all_notes:
-                # Slash chord: Replace bass note with the slash bass note
-                # Example: A/G# means A chord with G# in bass
-                midiInfo = midi.copy()
+            elif sequence[i-1] == '/' and element in self.all_notes:
+                # Slash chord: Take the current chord voicing, move old root up octave, add new bass
                 slash_bass = self.all_notes[element]
                 
-                # Remove the original root (first note) and replace with slash bass
-                if len(midiInfo) > 0:
-                    midiInfo[0] = slash_bass  # Replace bass note
+                # Start with current chord voicing (non-zero notes only)
+                midiInfo = [x for x in midi if x > 0]
                 
+                # Find and REMOVE the old root (lowest note)
+                if len(midiInfo) > 0:
+                    old_root = min(midiInfo)  # Get the actual lowest note
+                    
+                    # Remove ALL occurrences of the old root from the voicing
+                    midiInfo = [x for x in midiInfo if x != old_root]
+                    
+                    # ALSO remove the new bass note if it already exists in the chord
+                    # (e.g., G7/D where D is the 5th of G7)
+                    midiInfo = [x for x in midiInfo if x != slash_bass]
+                    
+                    # Add the old root back, moved up one octave
+                    midiInfo.insert(0, old_root + 12)
+                    
+                    # Insert the new bass note at the very beginning
+                    midiInfo.insert(0, slash_bass)
+                else:
+                    # No chord voicing - just add the bass
+                    midiInfo.insert(0, slash_bass)
+                
+                # Pad to 8 notes
+                while len(midiInfo) < 8:
+                    midiInfo.append(0)
+                
+                # Append the slash chord
                 info = (midiInfo, duration, element)
                 midi_sequence.append(info)
                 
-                # Update previous_voicing so voice leading continues correctly
-                previous_voicing = [n for n in midiInfo if n != 0]
+                # Update midi and previous_voicing for subsequent operations
+                midi = midiInfo
+                previous_voicing = [x for x in midiInfo if x > 0]
+                chord_label = ''  # Reset
             
             # Structural elements section ---------------------------------------------
             elif element in self.structural_elements and element != '/':
+                # Save current chord if exists
+                if chord_label != '':
+                    couple = (midi.copy(), duration, chord_label)
+                    midi_sequence.append(couple)
+                    chord_label = ''
+                
+                # Append structural marker
                 thisMidi = [0, 0, 0, 0, 0, 0, 0, 0]
                 couple = (thisMidi, duration, element)
                 midi_sequence.append(couple)
                 
             # Form section -------------------------------------------------------------
             elif element not in self.all_notes and element not in self.natures and element not in self.structural_elements and element not in self.durations:
+                # Save current chord if exists
+                if chord_label != '':
+                    couple = (midi.copy(), duration, chord_label)
+                    midi_sequence.append(couple)
+                    chord_label = ''
+                
+                # Append form marker
                 thisMidi = [0, 0, 0, 0, 0, 0, 0, 0]
                 couple = (thisMidi, duration, element)
                 midi_sequence.append(couple)
+        
+        # Don't forget the last chord!
+        if chord_label != '':
+            couple = (midi.copy(), duration, chord_label)
+            midi_sequence.append(couple)
         
             
         #Normalize the length of the MIDI sequence to 8 ----------------------------
         for i, item in enumerate(midi_sequence):    
             current_midi = item[0]
-            #duration = item[1]
+            item_duration = item[1]  # Use the item's actual duration, not the loop variable!
             element = item[2]
             if len(current_midi) < 8:
-                for i in range(8 - len(current_midi)):
+                for j in range(8 - len(current_midi)):
                     current_midi.append(0)
-                item = (current_midi, duration, element)
+                # Update the item in the list with normalized MIDI
+                midi_sequence[i] = (current_midi, item_duration, element)
      
         return midi_sequence, status
     
@@ -1068,37 +1133,32 @@ class Voicing:
     #--------------------------------------------------------------------------------
     #Export the file to MIDI
     def export_to_midi(self, sequence, filename, path = "../dataset/midi_files/"):
-        #Capture the information
+        """
+        Export sequence to MIDI file.
+        
+        CORRECT LOGIC: Extract chord voicings based on their labels.
+        - Chord natures (min7, dom7, maj7, etc.) contain the full voicings
+        - Slash chords are labeled with note names after '/' marker
+        - Skip structural elements (dots, pipes, durations)
+        """
         midi_capture = []
+        
+        # Extract all real chord voicings from the sequence
+        for i, (midi, duration, label) in enumerate(sequence):
+            # Skip empty MIDI data
+            if midi == [0, 0, 0, 0, 0, 0, 0, 0]:
+                continue
             
-        for i, element in enumerate(sequence):
-            #print('chord:', element)
-            chord = element[2]
-            
-            if chord == '.' and i < len(sequence) - 2:
-                ref = i
-                counter = 0
-                doIt = True
-                while doIt and ref < len(sequence)-1:       
-                    counter += 1 
-                    ref += 1
-                    next = sequence[ref][2]
-                    if next in self.after_chords or next.startswith('Form_') or next == '<end>':
-                        doIt = False
-                        counter -= 1
-                    
-                #print(i, "\t", element, "\t", counter, sequence[i+counter])
-                
-                if counter > 0:
-                    midi = (sequence[i+counter][0], sequence[i+counter][1])
-                    if midi[0] == [0, 0, 0, 0, 0, 0, 0, 0]:
-                        assert False, 'Error: Empty MIDI'
-                        print("Error: Empty MIDI", counter, i)
-                        
-                    if midi[0] == [48, 48, 48, 48, 0, 0, 0, 0]: #this is a N.C.!
-                        midi = ([0, 0, 0, 0, 0, 0, 0, 0], sequence[i+counter][1])
-                    #print('\nmidi:', midi)
-                    midi_capture.append(midi)
+            # Check if this is a chord nature (min7, dom7, maj7, sus, etc.)
+            # OR a slash chord bass note (appears after '/' marker)
+            if label in self.natures:
+                # This is a full chord with a nature label
+                midi_capture.append((midi, duration))
+            elif len([n for n in midi if n > 0]) >= 3:
+                # This has 3+ notes - likely a slash chord or modified chord
+                # Check if previous element was a slash
+                if i > 0 and sequence[i-1][2] == '/':
+                    midi_capture.append((midi, duration))
         
         #check distances and correct them
         for i, midiChord in enumerate(midi_capture):

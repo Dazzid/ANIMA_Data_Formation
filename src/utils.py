@@ -4,6 +4,7 @@ import torch
 import numpy as np
 import xml.etree.ElementTree as ET
 from tqdm.auto import tqdm
+from midiutil import MIDIFile
 
 import formats as fmt
 import librosa as lib
@@ -443,3 +444,128 @@ def load_model(MODEL_NAME, model):
     model.cuda()
     print('Checkpoint loaded', MODEL_NAME)
     return model
+
+#-------------------------------------------------------------------------
+# MPE MIDI Export Class
+#-------------------------------------------------------------------------
+class MPE_MIDI_Exporter:
+    """
+    Export MIDI files with MPE (MIDI Polyphonic Expression) support.
+    MPE allows independent pitch bend per note, essential for microtonal music.
+    """
+    
+    def __init__(self, num_channels=15, pitch_bend_range=48):
+        """
+        Initialize MPE MIDI Exporter
+        
+        Args:
+            num_channels: Number of note channels (2-16), channel 1 is master
+            pitch_bend_range: Pitch bend range in semitones (default ±48 for microtonal)
+        """
+        self.num_channels = num_channels
+        self.pitch_bend_range = pitch_bend_range
+        self.master_channel = 0  # Channel 1 (0-indexed)
+        self.note_channels = list(range(1, num_channels + 1))  # Channels 2-16
+        self.current_channel_idx = 0
+        
+    def get_next_channel(self):
+        """Round-robin channel allocation for polyphony"""
+        channel = self.note_channels[self.current_channel_idx]
+        self.current_channel_idx = (self.current_channel_idx + 1) % len(self.note_channels)
+        return channel
+    
+    def setup_mpe_channels(self, midi_file):
+        """
+        Configure MPE channels with proper settings
+        - Set pitch bend range for all channels
+        - Configure master channel
+        """
+        # Set pitch bend range on master channel (RPN MSB/LSB for pitch bend sensitivity)
+        for channel in [self.master_channel] + self.note_channels:
+            # RPN for pitch bend sensitivity
+            midi_file.makeRPNCall(track=0, channel=channel, time=0, 
+                                 controller_msb=0, controller_lsb=0, 
+                                 data_msb=self.pitch_bend_range, data_lsb=0)
+    
+    def export_to_mpe_midi(self, midi_voicing_data, filename, output_path='./'):
+        """
+        Export MIDI voicing data to MPE-formatted MIDI file
+        
+        Args:
+            midi_voicing_data: List of 3-tuples [(midi_notes_array, duration, chord_name), ...]
+            filename: Output filename
+            output_path: Directory to save file
+        """
+        # Create MIDI file with 1 track
+        midi = MIDIFile(1, adjust_origin=False)
+        track = 0
+        tempo = 120
+        
+        midi.addTempo(track, 0, tempo)
+        
+        # Setup MPE channels
+        self.setup_mpe_channels(midi)
+        
+        # Process sequence to extract actual chord events (following dot logic from voicing.py)
+        midi_capture = []
+        structural_elements = {'.', '|', ':|', '|:', '/', 'N.C.', '<end>'}
+        
+        for i, element in enumerate(midi_voicing_data):
+            chord_name = element[2]
+            
+            # Dots indicate chord positions - look ahead to find the complete chord
+            if chord_name == '.' and i < len(midi_voicing_data) - 2:
+                ref = i
+                counter = 0
+                doIt = True
+                
+                # Look ahead to find the actual chord (skip duration tokens, etc.)
+                while doIt and ref < len(midi_voicing_data) - 1:
+                    counter += 1
+                    ref += 1
+                    next_chord = midi_voicing_data[ref][2]
+                    
+                    # Stop when hitting structural elements or form markers
+                    if next_chord in structural_elements or next_chord.startswith('Form_'):
+                        doIt = False
+                        counter -= 1
+                
+                # Found the complete chord - use its MIDI data with the dot's duration
+                if counter > 0:
+                    chord_midi = midi_voicing_data[i + counter][0]
+                    chord_duration = element[1]  # Use dot's duration
+                    
+                    # Filter out N.C. chords and empty MIDI
+                    if chord_midi != [0, 0, 0, 0, 0, 0, 0, 0] and chord_midi != [48, 48, 48, 48, 0, 0, 0, 0]:
+                        midi_capture.append((chord_midi, chord_duration))
+        
+        # Export captured chords to MPE MIDI
+        current_time = 0.0
+        
+        for midi_notes, duration in midi_capture:
+            # Filter out zero values (rests/structural elements)
+            active_notes = [note for note in midi_notes if note > 0]
+            
+            if len(active_notes) > 0:
+                # Add each note to a separate MPE channel
+                for note in active_notes:
+                    channel = self.get_next_channel()
+                    velocity = 100
+                    
+                    # Add note on MPE channel
+                    midi.addNote(track=track, 
+                               channel=channel, 
+                               pitch=int(note), 
+                               time=current_time, 
+                               duration=duration, 
+                               volume=velocity)
+            
+            # Advance time
+            current_time += duration
+        
+        # Write MIDI file
+        full_path = f"{output_path}/{filename}.mid"
+        with open(full_path, 'wb') as output_file:
+            midi.writeFile(output_file)
+        
+        return full_path
