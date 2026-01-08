@@ -1,6 +1,8 @@
 # ANIMA Data Formation
 
-**ANIMA** (Adaptive Neural Intelligence for Musical Augmentation) - A pipeline for creating hybrid 12-TET/53-TET MIDI chord progression datasets for training transformer models on microtonal harmony.
+**ANIMA** (Artificial INtelligence-based Interactive Microtonal Compositional Assistant) 
+This is a pipeline for creating hybrid 12-TET/53-TET MIDI chord progression datasets for training transformer models on microtonal harmony.
+[ANIMA](https://cordis.europa.eu/project/id/101203318)
 
 ## 🎯 Project Overview
 

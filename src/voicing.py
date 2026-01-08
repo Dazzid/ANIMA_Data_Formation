@@ -59,202 +59,203 @@ class Voicing:
             'F##': 55, 'F###': 56, 'Fbb': 51, 'G##': 45, 'Gbb': 41
             }
         
-        # Enhanced voicing templates inspired by modal_studio_Chord.js
-        # Each chord type now has 7 different voicing templates (v_0 through v_6)
-        # These provide better voice leading and more sophisticated harmonic structures
+        # Enhanced voicing templates following Berklee principles
+        # Focus on ROOT + 3 + 7 as basic chord sound
+        # 5th is optional unless altered
+        # Templates provide different spacings and optional tensions
         
-        # Major chord voicings with 7 templates
+        # Major chord voicings (no 7th, so basic sound = 3 + 5)
         self.maj = {
-            'v_0': [0, 7, 12, 16],           # Root position, open voicing
-            'v_1': [0, 7, 16, 19],           # Wide spacing, root doubled
-            'v_2': [0, 12, 16, 19],          # Root-fifth-octave-third
-            'v_3': [0, 4, 7, 12, 16],        # Closed position with doubled root
-            'v_4': [0, 12, 16, 19, 24],      # Extended voicing
-            'v_5': [0, 7, 12, 16, 19],       # Balanced voicing
-            'v_6': [0, 7, 12, 14, 16, 19]    # Add 9th for richness
+            'v_0': [0, 16, 19],              # Root + M3 + P5 (basic triad)
+            'v_1': [0, 16, 19, 24],          # Add octave
+            'v_2': [0, 12, 16, 19],          # Doubled root
+            'v_3': [0, 16, 19, 26],          # Add 9th
+            'v_4': [0, 12, 16, 19, 24],      # Full voicing
+            'v_5': [0, 16, 19, 24, 28],      # Add 9th high
+            'v_6': [0, 14, 16, 19]           # Add 9th color tone
         }
         
-        # Major 7th voicings
+        # Major 7th voicings (basic sound = 3 + 7)
         self.maj7 = {
-            'v_0': [0, 11, 16, 19],          # Drop 2 voicing
-            'v_1': [0, 7, 11, 16, 19],       # Full maj7 with fifth
-            'v_2': [0, 11, 14, 16],          # Close voicing
-            'v_3': [0, 4, 7, 11, 14],        # Closed position
-            'v_4': [0, 7, 11, 14, 19],       # Balanced spread
-            'v_5': [0, 7, 11, 16, 19],       # Open voicing
-            'v_6': [0, 7, 11, 14, 16, 19]    # Complete with doubled notes
+            'v_0': [0, 16, 23],              # Root + M3 + M7 (essential)
+            'v_1': [0, 16, 19, 23],          # Add P5
+            'v_2': [0, 11, 16, 23],          # 7th in bass register
+            'v_3': [0, 16, 23, 26],          # Add 9th
+            'v_4': [0, 14, 16, 23],          # 9th for color
+            'v_5': [0, 16, 19, 23, 26],      # Full with 9th
+            'v_6': [0, 14, 16, 19, 23]       # Complete voicing
         }
         
-        # Minor chord voicings
+        # Minor chord voicings (basic sound = m3 + 5)
         self.m = {
-            'v_0': [0, 12, 15, 19],          # Root-octave-m3-fifth
-            'v_1': [0, 7, 12, 15],           # Root-fifth-octave-m3
-            'v_2': [0, 7, 15, 19],           # Open minor voicing
-            'v_3': [0, 3, 7, 12],            # Closed position
-            'v_4': [0, 7, 12, 15, 19],       # Extended voicing
-            'v_5': [0, 7, 15, 19, 24],       # Wide spread
-            'v_6': [0, 7, 12, 14, 15, 19]    # Add 9th for color
+            'v_0': [0, 15, 19],              # Root + m3 + P5
+            'v_1': [0, 15, 19, 24],          # Add octave
+            'v_2': [0, 12, 15, 19],          # Doubled root
+            'v_3': [0, 15, 19, 26],          # Add 9th
+            'v_4': [0, 12, 15, 19, 24],      # Full voicing
+            'v_5': [0, 15, 19, 24, 26],      # Add 9th high
+            'v_6': [0, 14, 15, 19]           # Add 9th color
         }
         
-        # Minor 7th voicings
+        # Minor 7th voicings (basic sound = m3 + b7)
         self.m7 = {
-            'v_0': [0, 10, 15, 19],          # Drop 2 minor 7
-            'v_1': [0, 7, 10, 15],           # Root-fifth-b7-m3
-            'v_2': [0, 10, 14, 15],          # Close voicing
-            'v_3': [0, 3, 7, 10, 15],        # Full closed
-            'v_4': [0, 7, 10, 15, 19],       # Balanced
-            'v_5': [0, 7, 10, 14, 15, 19],   # Extended
-            'v_6': [0, 7, 10, 14, 15, 22]    # Add 9th in upper register
+            'v_0': [0, 15, 22],              # Root + m3 + b7 (essential)
+            'v_1': [0, 15, 19, 22],          # Add P5
+            'v_2': [0, 10, 15, 22],          # 7th in bass register
+            'v_3': [0, 15, 22, 26],          # Add 9th
+            'v_4': [0, 14, 15, 22],          # 9th for color
+            'v_5': [0, 15, 19, 22, 26],      # Full with 9th
+            'v_6': [0, 14, 15, 19, 22]       # Complete voicing
         }
         
-        # Dominant 7th voicings (most important for jazz)
+        # Dominant 7th voicings (basic sound = 3 + b7) - MOST IMPORTANT
         self.dom7 = {
-            'v_0': [0, 10, 16, 19],          # Drop 2, no fifth
-            'v_1': [0, 10, 14, 16, 19],      # Full dom7
-            'v_2': [0, 10, 14, 16],          # Close voicing
-            'v_3': [0, 4, 7, 10, 16],        # Closed with bass
-            'v_4': [0, 7, 10, 14, 16, 19],   # Complete voicing
-            'v_5': [0, 7, 10, 16, 19],       # Open drop 2
-            'v_6': [0, 7, 10, 14, 16, 22]    # With 9th extension
+            'v_0': [0, 16, 22],              # Root + M3 + b7 (essential tritone!)
+            'v_1': [0, 16, 19, 22],          # Add P5
+            'v_2': [0, 10, 16, 22],          # 7th in bass register
+            'v_3': [0, 16, 22, 26],          # Add 9th
+            'v_4': [0, 14, 16, 22],          # 9th for color
+            'v_5': [0, 16, 19, 22, 26],      # Full with 9th
+            'v_6': [0, 13, 16, 22]           # Add b9 (altered)
         }
         
-        # Half-diminished (ø7) voicings
+        # Half-diminished (ø7) voicings (basic sound = m3 + b5 + b7)
         self.ø7 = {
-            'v_0': [0, 10, 15, 18],          # Drop 2 half-dim
-            'v_1': [0, 6, 10, 15],           # Root-dim5-b7-m3
-            'v_2': [0, 10, 15, 18, 22],      # Extended
-            'v_3': [0, 3, 6, 10, 15],        # Closed
-            'v_4': [0, 6, 10, 15, 18],       # Balanced
-            'v_5': [0, 6, 10, 14, 15, 18],   # Complete
-            'v_6': [0, 6, 10, 14, 15, 22]    # With 9th
+            'v_0': [0, 15, 18, 22],          # Root + m3 + b5 + b7
+            'v_1': [0, 18, 22, 27],          # Spread voicing
+            'v_2': [0, 15, 22, 26],          # With 9th
+            'v_3': [0, 15, 18, 22, 26],      # Full with 9th
+            'v_4': [0, 14, 15, 18, 22],      # 9th color
+            'v_5': [0, 15, 18, 22, 27],      # Wide spread
+            'v_6': [0, 18, 22, 26, 30]       # Upper extensions
         }
         
-        # Diminished 7th voicings
+        # Diminished 7th voicings (symmetrical structure)
         self.o7 = {
-            'v_0': [0, 6, 9, 15],            # Symmetrical dim7
-            'v_1': [0, 9, 15, 18],           # Spread dim7
-            'v_2': [0, 9, 15, 18, 21],       # Extended
-            'v_3': [0, 3, 6, 9, 15],         # Closed
-            'v_4': [0, 6, 9, 15, 18],        # Balanced
-            'v_5': [0, 6, 9, 12, 15, 18],    # Complete
-            'v_6': [0, 6, 9, 12, 15, 21]     # Wide spread
+            'v_0': [0, 15, 18, 21],          # Root + m3 + dim5 + dim7
+            'v_1': [0, 15, 21, 24],          # Spread
+            'v_2': [0, 15, 18, 21, 27],      # Extended
+            'v_3': [0, 9, 15, 21],           # Different inversion feel
+            'v_4': [0, 15, 18, 21, 24],      # Full
+            'v_5': [0, 15, 21, 27],          # Wide
+            'v_6': [0, 15, 18, 24, 27]       # Very open
         }
         
         # Diminished triad voicings
         self.o = {
-            'v_0': [0, 3, 6, 12],            # Basic dim triad
-            'v_1': [0, 6, 12, 15],           # Open dim
-            'v_2': [0, 6, 9, 15],            # Spread
-            'v_3': [0, 3, 6, 9, 12],         # Extended
-            'v_4': [0, 6, 9, 12, 15],        # Balanced
-            'v_5': [0, 6, 12, 15, 18],       # Wide
-            'v_6': [0, 3, 6, 12, 15]         # Complete
+            'v_0': [0, 15, 18],              # Root + m3 + dim5
+            'v_1': [0, 15, 18, 24],          # Add octave
+            'v_2': [0, 9, 15, 18],           # Different spacing
+            'v_3': [0, 15, 18, 21],          # Add dim7
+            'v_4': [0, 12, 15, 18],          # Doubled root
+            'v_5': [0, 15, 18, 24, 27],      # Extended
+            'v_6': [0, 15, 21, 27]           # Wide spread
         }
         
-        # Sus4 voicings
+        # Sus4 voicings (basic sound = 4 + 5)
         self.sus = {
-            'v_0': [0, 7, 17, 19],           # Sus4 open
-            'v_1': [0, 5, 7, 12],            # Closed sus4
-            'v_2': [0, 7, 12, 17],           # Balanced
-            'v_3': [0, 5, 7, 12, 17],        # Complete
-            'v_4': [0, 7, 12, 17, 19],       # Extended
-            'v_5': [0, 7, 12, 14, 17],       # With 9th
-            'v_6': [0, 7, 12, 14, 17, 19]    # Full voicing
+            'v_0': [0, 17, 19],              # Root + P4 + P5
+            'v_1': [0, 17, 19, 24],          # Add octave
+            'v_2': [0, 12, 17, 19],          # Doubled root
+            'v_3': [0, 17, 19, 26],          # Add 9th
+            'v_4': [0, 14, 17, 19],          # 9th color
+            'v_5': [0, 17, 19, 24, 26],      # Full with 9th
+            'v_6': [0, 14, 17, 19, 24]       # Complete
         }
         
-        # Sus7 voicings
+        # Sus7 voicings (basic sound = 4 + b7)
         self.sus7 = {
-            'v_0': [0, 10, 17, 19],          # Sus7 drop 2
-            'v_1': [0, 10, 14, 17],          # Close sus7
-            'v_2': [0, 7, 10, 17],           # Open sus7
-            'v_3': [0, 5, 7, 10, 17],        # Complete
-            'v_4': [0, 7, 10, 14, 17, 19],   # Extended
-            'v_5': [0, 7, 10, 17, 19],       # Balanced
-            'v_6': [0, 7, 10, 14, 17, 22]    # With 9th
+            'v_0': [0, 17, 22],              # Root + P4 + b7
+            'v_1': [0, 17, 19, 22],          # Add P5
+            'v_2': [0, 10, 17, 22],          # 7th in bass register
+            'v_3': [0, 17, 22, 26],          # Add 9th
+            'v_4': [0, 14, 17, 22],          # 9th color
+            'v_5': [0, 17, 19, 22, 26],      # Full with 9th
+            'v_6': [0, 14, 17, 19, 22]       # Complete
         }
         
-        # Sus2 voicings
+        # Sus2 voicings (basic sound = 2 + 5)
         self.sus2 = {
-            'v_0': [0, 2, 7, 12],            # Basic sus2
-            'v_1': [0, 7, 14, 19],           # Open sus2
-            'v_2': [0, 2, 7, 14],            # Balanced
-            'v_3': [0, 2, 7, 12, 14],        # Complete
-            'v_4': [0, 7, 14, 19, 24],       # Extended
-            'v_5': [0, 2, 7, 12, 19],        # Wide
-            'v_6': [0, 2, 7, 12, 14, 19]     # Full voicing
+            'v_0': [0, 14, 19],              # Root + M2 + P5
+            'v_1': [0, 14, 19, 24],          # Add octave
+            'v_2': [0, 12, 14, 19],          # Doubled root
+            'v_3': [0, 14, 19, 26],          # Add 9th (same as M2)
+            'v_4': [0, 14, 19, 24, 26],      # Extended
+            'v_5': [0, 7, 14, 19],           # Add low fifth
+            'v_6': [0, 14, 19, 21]           # Add color tone
         }
         
         # Sus4 specific
         self.sus4 = {
-            'v_0': [0, 5, 7, 12],            # Basic sus4
-            'v_1': [0, 7, 17, 19],           # Open sus4
-            'v_2': [0, 5, 7, 17],            # Balanced
-            'v_3': [0, 5, 7, 12, 17],        # Complete
-            'v_4': [0, 7, 12, 17, 19],       # Extended
-            'v_5': [0, 5, 7, 12, 14],        # With 9th
-            'v_6': [0, 5, 7, 12, 14, 17]     # Full voicing
+            'v_0': [0, 17, 19],              # Root + P4 + P5
+            'v_1': [0, 17, 19, 24],          # Add octave
+            'v_2': [0, 12, 17, 19],          # Doubled root
+            'v_3': [0, 17, 19, 26],          # Add 9th
+            'v_4': [0, 14, 17, 19],          # 9th color
+            'v_5': [0, 17, 19, 24, 26],      # Full with 9th
+            'v_6': [0, 14, 17, 19, 24]       # Complete
         }
         
-        # Augmented voicings
+        # Augmented voicings (altered 5th)
         self.aug = {
-            'v_0': [0, 4, 8, 12],            # Symmetrical aug
-            'v_1': [0, 8, 12, 16],           # Spread aug
-            'v_2': [0, 4, 8, 16],            # Open aug
-            'v_3': [0, 4, 8, 12, 16],        # Complete
-            'v_4': [0, 8, 12, 16, 20],       # Extended
-            'v_5': [0, 4, 8, 12, 20],        # Wide spread
-            'v_6': [0, 4, 8, 12, 14, 16]     # With 9th
+            'v_0': [0, 16, 20],              # Root + M3 + #5 (altered 5th!)
+            'v_1': [0, 16, 20, 24],          # Add octave
+            'v_2': [0, 12, 16, 20],          # Doubled root
+            'v_3': [0, 16, 20, 26],          # Add 9th
+            'v_4': [0, 14, 16, 20],          # 9th color
+            'v_5': [0, 16, 20, 24, 28],      # Extended
+            'v_6': [0, 16, 20, 24, 26]       # Full with 9th
         }
         
-        # Minor major 7th voicings
+        # Minor major 7th voicings (basic sound = m3 + M7)
         self.m_maj7 = {
-            'v_0': [0, 11, 15, 19],          # Drop 2 m(maj7)
-            'v_1': [0, 7, 11, 15],           # Root-fifth-maj7-m3
-            'v_2': [0, 7, 11, 14, 15],       # Close voicing
-            'v_3': [0, 3, 7, 11, 15],        # Complete closed
-            'v_4': [0, 7, 11, 15, 19],       # Balanced
-            'v_5': [0, 7, 11, 14, 15, 19],   # Extended
-            'v_6': [0, 7, 11, 14, 15, 22]    # With 9th
+            'v_0': [0, 15, 23],              # Root + m3 + M7
+            'v_1': [0, 15, 19, 23],          # Add P5
+            'v_2': [0, 11, 15, 23],          # 7th in bass register
+            'v_3': [0, 15, 23, 26],          # Add 9th
+            'v_4': [0, 14, 15, 23],          # 9th color
+            'v_5': [0, 15, 19, 23, 26],      # Full with 9th
+            'v_6': [0, 14, 15, 19, 23]       # Complete
         }
         
-        # Major 6th voicings
+        # Major 6th voicings (basic sound = 3 + 6)
         self.maj6 = {
-            'v_0': [0, 7, 9, 16],            # Drop 2 maj6
-            'v_1': [0, 9, 16, 19],           # Open maj6
-            'v_2': [0, 4, 7, 9, 12],         # Closed maj6
-            'v_3': [0, 7, 9, 12, 16],        # Complete
-            'v_4': [0, 7, 9, 14, 16],        # Extended
-            'v_5': [0, 7, 9, 12, 16, 19],    # Full voicing
-            'v_6': [0, 4, 7, 9, 14, 16]      # With 9th
+            'v_0': [0, 16, 21],              # Root + M3 + M6
+            'v_1': [0, 16, 19, 21],          # Add P5
+            'v_2': [0, 9, 16, 21],           # 6th in bass register
+            'v_3': [0, 16, 21, 26],          # Add 9th
+            'v_4': [0, 14, 16, 21],          # 9th color
+            'v_5': [0, 16, 19, 21, 26],      # Full with 9th
+            'v_6': [0, 14, 16, 19, 21]       # Complete
         }
         
-        # Minor 6th voicings
+        # Minor 6th voicings (basic sound = m3 + 6)
         self.m6 = {
-            'v_0': [0, 7, 9, 15],            # Drop 2 m6
-            'v_1': [0, 9, 15, 19],           # Open m6
-            'v_2': [0, 3, 7, 9, 15],         # Closed m6
-            'v_3': [0, 7, 9, 12, 15],        # Complete
-            'v_4': [0, 7, 9, 15, 19],        # Balanced
-            'v_5': [0, 7, 9, 12, 15, 19],    # Extended
-            'v_6': [0, 3, 7, 9, 14, 15]      # With 9th
+            'v_0': [0, 15, 21],              # Root + m3 + M6
+            'v_1': [0, 15, 19, 21],          # Add P5
+            'v_2': [0, 9, 15, 21],           # 6th in bass register
+            'v_3': [0, 15, 21, 26],          # Add 9th
+            'v_4': [0, 14, 15, 21],          # 9th color
+            'v_5': [0, 15, 19, 21, 26],      # Full with 9th
+            'v_6': [0, 14, 15, 19, 21]       # Complete
         }
         
-        # Diminished major 7th voicings
+        # Diminished major 7th voicings (basic sound = m3 + dim5 + M7)
         self.o_maj7 = {
-            'v_0': [0, 11, 15, 18],          # Drop 2 o(maj7)
-            'v_1': [0, 6, 11, 15],           # Root-dim5-maj7-m3
-            'v_2': [0, 6, 11, 15, 18],       # Complete
-            'v_3': [0, 3, 6, 11, 15],        # Closed
-            'v_4': [0, 6, 11, 14, 15],       # Balanced
-            'v_5': [0, 6, 11, 15, 18, 22],   # Extended
-            'v_6': [0, 6, 11, 12, 15, 18]    # Full voicing
+            'v_0': [0, 15, 18, 23],          # Root + m3 + dim5 + M7
+            'v_1': [0, 18, 23, 27],          # Spread
+            'v_2': [0, 15, 23, 26],          # With 9th
+            'v_3': [0, 15, 18, 23, 26],      # Full with 9th
+            'v_4': [0, 14, 15, 18, 23],      # 9th color
+            'v_5': [0, 15, 18, 23, 27],      # Wide
+            'v_6': [0, 18, 23, 26, 30]       # Upper extensions
         }
         
-        # Power chord voicings
+        # Power chord voicings (just root + 5th)
         self.power = {
-            'v_0': [0, 7, 12],               # Basic power chord
-            'v_1': [0, 7, 12, 19],           # Extended power
-            'v_2': [0, 7, 12, 24],           # Wide power
+            'v_0': [0, 19],                  # Basic power chord (root + P5)
+            'v_1': [0, 19, 24],              # Add octave
+            'v_2': [0, 12, 19],              # Doubled root
             'v_3': [0, 7, 12, 19, 24],       # Full power
             'v_4': [0, 12, 19],              # Octave power
             'v_5': [0, 7, 19],               # Open power
@@ -693,34 +694,214 @@ class Voicing:
         
         return total_distance
     
-    def select_best_voicing(self, previous_voicing, candidate_voicings):
+    def select_best_voicing(self, previous_voicing, candidate_voicings, prev_root=None, curr_root=None):
         """
-        Select the voicing with the best (minimum) voice leading from previous chord.
+        Select voicing using Berklee voice leading principles.
         
-        This is the CORE voice leading logic - it evaluates all possible voicing templates
-        and chooses the one where voices move the least distance.
+        Follows proper jazz/pop voice leading:
+        1. Root stays in bass
+        2. Focus on moving 3 and 7 smoothly
+        3. Use different rules based on root motion (4th/5th vs 2nd vs 3rd)
         
         Args:
-            previous_voicing: List of MIDI notes from previous chord (non-zero notes)
-            candidate_voicings: List of possible voicings to choose from (all 7 templates)
+            previous_voicing: List of MIDI notes from previous chord
+            candidate_voicings: List of possible voicings (7 templates)
+            prev_root: Previous chord root (MIDI note)
+            curr_root: Current chord root (MIDI note)
             
         Returns:
-            The voicing with minimum total voice movement
+            Optimized voicing following voice leading principles
         """
         if not previous_voicing or not candidate_voicings:
             return candidate_voicings[0] if candidate_voicings else [0, 4, 7, 12]
         
-        best_voicing = candidate_voicings[0]
+        prev_notes = [n for n in previous_voicing if n != 0]
+        if not prev_notes:
+            return candidate_voicings[0]
+        
+        best_voicing = None
         min_distance = float('inf')
         
+        # Try each candidate voicing template
         for voicing in candidate_voicings:
-            distance = self.calculate_voice_leading_distance(previous_voicing, voicing)
+            # Optimize this voicing by adjusting octaves for best voice leading
+            optimized = self.optimize_voicing_octaves(prev_notes, voicing)
+            
+            # Calculate total voice movement
+            distance = self.calculate_optimized_distance(prev_notes, optimized)
             
             if distance < min_distance:
                 min_distance = distance
-                best_voicing = voicing
+                best_voicing = optimized
         
-        return best_voicing
+        return best_voicing if best_voicing is not None else candidate_voicings[0]
+    
+    def optimize_voicing_octaves(self, prev_notes, next_voicing):
+        """
+        Adjust octaves using Berklee voice leading principles.
+        
+        CRITICAL RULES:
+        1. Root (bass note) stays FIXED
+        2. Upper voices (3, 7, and any extensions) move to minimize distance
+        3. Basic chord sound (3 and 7) should stay in comfortable range
+        
+        Args:
+            prev_notes: List of MIDI notes from previous chord (non-zero only)
+            next_voicing: Candidate voicing from template
+            
+        Returns:
+            Voicing with octaves adjusted for smooth voice leading
+        """
+        next_notes = [n for n in next_voicing if n != 0]
+        if not next_notes or not prev_notes:
+            return next_voicing
+        
+        # ROOT STAYS FIXED in bass
+        root = next_notes[0]
+        upper_voices = next_notes[1:] if len(next_notes) > 1 else []
+        
+        # Get previous upper voices (exclude bass)
+        prev_upper = sorted([n for n in prev_notes if n > prev_notes[0]])
+        
+        optimized = [root]  # Bass is locked
+        
+        # For each upper voice, find closest octave to previous upper voices
+        for next_note in upper_voices:
+            best_note = next_note
+            min_distance = float('inf')
+            
+            # Try different octaves
+            for octave_shift in [-24, -12, 0, 12, 24]:  # ±2 octaves
+                candidate = next_note + octave_shift
+                
+                # Must be: in range, above root, in comfortable voicing range
+                if candidate <= root or candidate < 24 or candidate > 96:
+                    continue
+                
+                # For 3rd and 7th (typically first two upper voices), prefer range C3-C5
+                # This follows Berklee recommendation for basic chord sound placement
+                voice_idx = len(optimized) - 1
+                if voice_idx <= 2:  # First two upper voices (likely 3 and 7)
+                    if candidate < 48 or candidate > 72:  # Outside C3-C5
+                        continue
+                
+                # Find distance to closest previous upper voice
+                if prev_upper:
+                    closest_prev_distance = min(abs(candidate - p) for p in prev_upper)
+                else:
+                    closest_prev_distance = abs(candidate - root)
+                
+                if closest_prev_distance < min_distance:
+                    min_distance = closest_prev_distance
+                    best_note = candidate
+            
+            optimized.append(best_note)
+        
+        # Sort upper voices only (keep root first)
+        if len(optimized) > 1:
+            upper_sorted = sorted(optimized[1:])
+            optimized = [optimized[0]] + upper_sorted
+        
+        # Pad with zeros
+        while len(optimized) < len(next_voicing):
+            optimized.append(0)
+        
+        return optimized
+    
+    def check_and_add_ninth(self, prev_notes, current_notes, root_note):
+        """
+        Add 9th ONLY when it genuinely fills a gap in voice leading.
+        
+        Very conservative - only adds if there's a specific voice leading need.
+        
+        Args:
+            prev_notes: Previous chord notes (non-zero)
+            current_notes: Current optimized voicing (non-zero, sorted)
+            root_note: Root note of current chord
+            
+        Returns:
+            Voicing with 9th added only if truly needed
+        """
+        if not prev_notes or not current_notes or len(current_notes) < 3:
+            return current_notes
+        
+        # Get highest notes
+        prev_highest = max(prev_notes)
+        current_highest = max(current_notes)
+        
+        # Only consider 9th if there's a big gap (>5 semitones) from prev to current highest
+        gap = abs(prev_highest - current_highest)
+        if gap <= 5:
+            return current_notes  # No gap to fill
+        
+        # Try natural 9th first, then b9 only if natural doesn't work
+        ninth_options = [2, 1]
+        
+        for ninth_interval in ninth_options:
+            # Try one octave above root only
+            ninth_note = root_note + ninth_interval + 12
+            
+            # Must be between prev and current highest (filling the gap)
+            if not (min(prev_highest, current_highest) < ninth_note < max(prev_highest, current_highest)):
+                continue
+            
+            # Must be in range and not too close to existing notes
+            if ninth_note > 96:
+                continue
+                
+            too_close = any(abs(ninth_note - n) <= 2 for n in current_notes)
+            if too_close:
+                continue
+            
+            # Found a 9th that fills the gap - use it and stop
+            current_notes.append(ninth_note)
+            current_notes.sort()
+            break
+        
+        return current_notes
+    
+    def calculate_optimized_distance(self, prev_notes, next_notes):
+        """
+        Calculate total voice leading distance between two voicings.
+        Each voice finds its nearest corresponding voice in the next chord.
+        
+        Args:
+            prev_notes: Previous chord notes (non-zero only)
+            next_notes: Next chord notes (already octave-optimized)
+            
+        Returns:
+            Total distance (sum of minimum movements)
+        """
+        next_clean = [n for n in next_notes if n != 0]
+        
+        if not prev_notes or not next_clean:
+            return 0
+        
+        # Greedy matching: each next note to its closest unused previous note
+        used_prev = set()
+        total_distance = 0
+        
+        # Sort both by pitch for better matching
+        sorted_next = sorted(next_clean)
+        sorted_prev = sorted(prev_notes)
+        
+        for next_note in sorted_next:
+            min_dist = float('inf')
+            best_prev_idx = 0
+            
+            for i, prev_note in enumerate(sorted_prev):
+                if i in used_prev:
+                    continue
+                    
+                dist = abs(next_note - prev_note)
+                if dist < min_dist:
+                    min_dist = dist
+                    best_prev_idx = i
+            
+            used_prev.add(best_prev_idx)
+            total_distance += min_dist
+        
+        return total_distance
     
     def select_voicing_by_position(self, position):
         """
