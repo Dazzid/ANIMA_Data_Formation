@@ -181,8 +181,21 @@ def get_metadata(path):
     info = root.find('identification').findall('creator')
 
     metadata['song_name'] = title
-    metadata['composer'] = info[0].text
-    metadata['style'] = info[1].text
+    metadata['composer'] = info[0].text if len(info) > 0 else 'Unknown'
+    metadata['style'] = info[1].text if len(info) > 1 else 'Unknown'
+    
+    # Extract additional metadata from identification section
+    identification = root.find('identification')
+    if identification is not None:
+        # Encoding info (software, date)
+        encoding = identification.find('encoding')
+        if encoding is not None:
+            software = encoding.find('software')
+            encoding_date = encoding.find('encoding-date')
+            if software is not None:
+                metadata['software'] = software.text
+            if encoding_date is not None:
+                metadata['encoding_date'] = encoding_date.text
 
     #print('Composer: ', metadata['composer'], '\nStyle: ', metadata['style'], '\nSong name: ',metadata['song_name'])
 
@@ -357,7 +370,62 @@ def generateDatasetSplit(db, split=0.1):
 
 #Save sessions ----------------------------------------------------------------
 import copy
+import json
 MODEL_NAME = "session_model"
+
+def save_metadata_to_json(metadata, output_dir="../dataset/metadata"):
+    """
+    Save metadata dictionary as individual JSON file per song.
+    
+    Args:
+        metadata: Dictionary with song metadata
+        output_dir: Directory to save JSON files
+    """
+    os.makedirs(output_dir, exist_ok=True)
+    
+    # Clean filename (remove invalid characters)
+    song_name = metadata.get('song_name', 'Unknown')
+    safe_filename = song_name.replace('/', '_').replace('\\', '_').replace(':', '_')
+    
+    json_path = os.path.join(output_dir, f"{safe_filename}.json")
+    
+    with open(json_path, 'w', encoding='utf-8') as f:
+        json.dump(metadata, f, indent=2, ensure_ascii=False)
+    
+    return json_path
+
+def export_all_metadata_from_xml(xml_dir="../dataset/iRealXML", output_dir="../dataset/metadata"):
+    """
+    Export metadata from all XML files as individual JSON files.
+    
+    Args:
+        xml_dir: Directory containing XML files
+        output_dir: Directory to save JSON files
+        
+    Returns:
+        List of exported JSON file paths
+    """
+    os.makedirs(output_dir, exist_ok=True)
+    exported_files = []
+    
+    xml_files = [f for f in os.listdir(xml_dir) if f.endswith('.xml')]
+    
+    print(f"Exporting metadata for {len(xml_files)} songs...")
+    
+    for xml_file in tqdm(xml_files):
+        xml_path = os.path.join(xml_dir, xml_file)
+        
+        try:
+            metadata = get_metadata(xml_path)
+            json_path = save_metadata_to_json(metadata, output_dir)
+            exported_files.append(json_path)
+        except Exception as e:
+            print(f"Error processing {xml_file}: {e}")
+            continue
+    
+    print(f"Exported {len(exported_files)} metadata files to {output_dir}")
+    return exported_files
+
 def save_model(MODEL_NAME, model):
     # SAVE THE SESSION MODEL 
     # DataParallel wrappers keep raw model object in .module attribute

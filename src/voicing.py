@@ -459,6 +459,7 @@ class Voicing:
         root = 0
         mod = 7  # Use 7 voicing templates for better variety and voice leading
         status = True
+        previous_voicing = None  # Track previous chord voicing for voice leading
         # Create a dictionary for the alter section
         add_dict = {
             'add b13': 8 + 12,
@@ -515,8 +516,21 @@ class Voicing:
             
             # Nature section --------------------------------------------------------
             elif element in self.natures:
-                n = i % mod
-                midi = [x + root for x in self.chord_voicing[element][self.voicing[n]]]
+                # Try all 7 voicing templates and select the one with best voice leading
+                all_voicings = []
+                for template_idx in range(mod):
+                    template_voicing = [x + root for x in self.chord_voicing[element][self.voicing[template_idx]]]
+                    all_voicings.append(template_voicing)
+                
+                # Select voicing with minimum voice movement from previous chord
+                if previous_voicing is not None:
+                    midi = self.select_best_voicing(previous_voicing, all_voicings)
+                else:
+                    # First chord - use v_0
+                    midi = all_voicings[0]
+                
+                previous_voicing = [n for n in midi if n != 0]  # Store for next iteration
+                
                 #print('chord:', element, midi)
                 infoMidi = midi.copy()
                 couple = (infoMidi, duration, element)
@@ -620,6 +634,93 @@ class Voicing:
     #--------------------------------------------------------------------------------
     # Advanced voice leading methods inspired by modal_studio_Chord.js
     #--------------------------------------------------------------------------------
+    
+    def calculate_voice_leading_distance(self, prev_voicing, next_voicing):
+        """
+        Calculate total voice movement between two voicings.
+        Lower values = better voice leading.
+        
+        This implements the voice leading principle: each note in a chord
+        should move the minimum distance to its corresponding note in the next chord.
+        
+        Args:
+            prev_voicing: List of MIDI note numbers from previous chord (non-zero notes only)
+            next_voicing: List of MIDI note numbers for candidate next chord
+            
+        Returns:
+            Total distance (sum of all voice movements in semitones)
+        """
+        if not prev_voicing or not next_voicing:
+            return 0
+        
+        # Remove zeros from both voicings
+        prev_notes = [n for n in prev_voicing if n != 0]
+        next_notes = [n for n in next_voicing if n != 0]
+        
+        if not prev_notes or not next_notes:
+            return 0
+        
+        total_distance = 0
+        
+        # For each note in the new chord, find its closest corresponding note in previous chord
+        # This creates optimal voice leading
+        used_prev_indices = set()
+        
+        for next_note in next_notes:
+            min_distance = float('inf')
+            best_prev_idx = 0
+            
+            # Try matching to each unused previous note
+            for prev_idx, prev_note in enumerate(prev_notes):
+                if prev_idx in used_prev_indices:
+                    continue
+                    
+                # Calculate distance (considering octave equivalence)
+                distance = abs(next_note - prev_note)
+                
+                # Also try octave transpositions to find closest version
+                for octave_shift in [-12, 12]:
+                    alt_distance = abs((next_note + octave_shift) - prev_note)
+                    if alt_distance < distance:
+                        distance = alt_distance
+                
+                if distance < min_distance:
+                    min_distance = distance
+                    best_prev_idx = prev_idx
+            
+            used_prev_indices.add(best_prev_idx)
+            total_distance += min_distance
+        
+        return total_distance
+    
+    def select_best_voicing(self, previous_voicing, candidate_voicings):
+        """
+        Select the voicing with the best (minimum) voice leading from previous chord.
+        
+        This is the CORE voice leading logic - it evaluates all possible voicing templates
+        and chooses the one where voices move the least distance.
+        
+        Args:
+            previous_voicing: List of MIDI notes from previous chord (non-zero notes)
+            candidate_voicings: List of possible voicings to choose from (all 7 templates)
+            
+        Returns:
+            The voicing with minimum total voice movement
+        """
+        if not previous_voicing or not candidate_voicings:
+            return candidate_voicings[0] if candidate_voicings else [0, 4, 7, 12]
+        
+        best_voicing = candidate_voicings[0]
+        min_distance = float('inf')
+        
+        for voicing in candidate_voicings:
+            distance = self.calculate_voice_leading_distance(previous_voicing, voicing)
+            
+            if distance < min_distance:
+                min_distance = distance
+                best_voicing = voicing
+        
+        return best_voicing
     
     def select_voicing_by_position(self, position):
         """
