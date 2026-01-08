@@ -423,15 +423,19 @@ class Voicing:
                 
             # Slash section --------------------------------------------------------    
             elif element == '/':
-                midi_for_slash = [0, 0, 0, 0, 0, 0, 0, 27]
-                midi_sequence.append(midi_for_slash)
+                # Don't append anything - just mark that next note is slash bass
+                pass
                 
             # New root after slash section -----------------------------------------  
             elif sequence[i-1][0] == '/' and element in self.all_notes:
+                # Slash chord: Replace bass note with the slash bass note
                 midiInfo = midi.copy()
-                slash_root = self.all_notes[element]
-                midiInfo[0] = midiInfo[0] + 12
-                midiInfo.insert(0, slash_root)
+                slash_bass = self.all_notes[element]
+                
+                # Replace the original root with slash bass
+                if len(midiInfo) > 0:
+                    midiInfo[0] = slash_bass
+                
                 midi_sequence.append(midiInfo)
             
             # Structural elements section ---------------------------------------------
@@ -593,18 +597,25 @@ class Voicing:
                 
             # Slash section --------------------------------------------------------    
             elif element == '/':
-                midi_for_slash = [0, 0, 0, 0, 0, 0, 0, 27]
-                info = (midi_for_slash, duration, element)
-                midi_sequence.append(info)
+                # Don't append anything - just mark that next note is slash bass
+                pass
                 
             # New root after slash section -----------------------------------------  
             elif sequence[i-1][0] == '/' and element in self.all_notes:
+                # Slash chord: Replace bass note with the slash bass note
+                # Example: A/G# means A chord with G# in bass
                 midiInfo = midi.copy()
-                slash_root = self.all_notes[element]
-                midiInfo[0] = midiInfo[0] + 12
-                midiInfo.insert(0, slash_root)
+                slash_bass = self.all_notes[element]
+                
+                # Remove the original root (first note) and replace with slash bass
+                if len(midiInfo) > 0:
+                    midiInfo[0] = slash_bass  # Replace bass note
+                
                 info = (midiInfo, duration, element)
                 midi_sequence.append(info)
+                
+                # Update previous_voicing so voice leading continues correctly
+                previous_voicing = [n for n in midiInfo if n != 0]
             
             # Structural elements section ---------------------------------------------
             elif element in self.structural_elements and element != '/':

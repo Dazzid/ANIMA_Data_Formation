@@ -1,4 +1,6 @@
-# ANIMA Data Formation
+[![License: CC BY-NC 4.0](https://img.shields.io/badge/License-CC%20BY--NC%204.0-lightgrey.svg)](https://creativecommons.org/licenses/by-nc/4.0/)
+
+# Microtonal Data Formation
 
 [ANIMA](https://cordis.europa.eu/project/id/101203318) (Artificial INtelligence-based Interactive Microtonal Compositional Assistant) 
 This is a pipeline for creating hybrid 12-TET/53-TET MIDI chord progression datasets for training transformer models on microtonal harmony.
@@ -264,3 +266,8 @@ Train transformer model on hybrid 12-TET/53-TET sequences.
 - Modal studio voicing techniques
 - Transformer models for music generation
 - MIDI Polyphonic Expression (MPE) specification
+
+## License
+This project is licensed under the **Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)**.
+For more details, see the full license at [Creative Commons CC BY-NC 4.0](https://creativecommons.org/licenses/by-nc/4.0/).
+Or read the license document attached.
