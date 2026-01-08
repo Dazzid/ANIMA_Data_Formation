@@ -204,7 +204,7 @@ Train transformer model on hybrid 12-TET/53-TET sequences.
 #### Architecture
 - **Model Size**: GPT-2 Small (124M parameters) - sufficient for this domain
 - **Context Window**: 1024 tokens (captures several progressions)
-- **Positional Encoding**: Consider relative encoding for variable-length sequences
+- **Positional Encoding**: EigenSpace chord reference as a positional dissonance perception model. 
 
 #### Training Strategies
 
