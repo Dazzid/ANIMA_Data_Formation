@@ -578,9 +578,32 @@ class Voicing:
                     
                 elif has_slash and token in self.all_notes:
                     # Slash bass note - modify the chord
-                    # Get the bass note in a LOW octave (octave 2, around MIDI 36-47)
+                    # Get the bass note pitch class
                     bass_pitch_class = self.all_notes[token] % 12
-                    slash_bass = 36 + bass_pitch_class  # Put bass in octave 2
+                    
+                    # SMOOTH VOICE LEADING: Find optimal octave for slash bass
+                    # Start with octave 2 as default
+                    slash_bass = 36 + bass_pitch_class
+                    
+                    # If we have a previous voicing, find closest octave
+                    if previous_voicing:
+                        prev_bass = previous_voicing[0]  # Previous bass note
+                        
+                        # Try different octaves and pick the closest to previous bass
+                        best_distance = float('inf')
+                        best_octave_bass = slash_bass
+                        
+                        # Try octaves 1-4 (MIDI 24-71)
+                        for octave in range(1, 5):
+                            candidate_bass = 12 * octave + bass_pitch_class
+                            distance = abs(candidate_bass - prev_bass)
+                            
+                            # Prefer smallest distance, but keep bass in reasonable range (24-60)
+                            if distance < best_distance and 24 <= candidate_bass <= 60:
+                                best_distance = distance
+                                best_octave_bass = candidate_bass
+                        
+                        slash_bass = best_octave_bass
                     
                     # Get non-zero notes from current voicing
                     notes = [x for x in midi if x > 0]
