@@ -59,214 +59,219 @@ class Voicing:
             'F##': 55, 'F###': 56, 'Fbb': 51, 'G##': 45, 'Gbb': 41
             }
         
-        # Enhanced voicing templates following Berklee principles
-        # Focus on ROOT + 3 + 7 as basic chord sound
-        # 5th is optional unless altered
-        # Templates provide different spacings and optional tensions
-        
-        # Major chord voicings (no 7th, so basic sound = 3 + 5)
+        # ----------------------------------------------------------------------
+        # CLOSED POSITION STACKS (4-note blocks for Drop 2/3)
+        # These are used to generate the Upper Structure
+        # ----------------------------------------------------------------------
+        self.closed_stacks = {
+            'maj':      [0, 4, 7, 12],   # R 3 5 R (Doubled Root)
+            'maj6':     [0, 4, 7, 9],    # R 3 5 6
+            'maj7':     [0, 4, 7, 11],   # R 3 5 7
+            'm':        [0, 3, 7, 12],   # R b3 5 R
+            'm6':       [0, 3, 7, 9],    # R b3 5 6
+            'm7':       [0, 3, 7, 10],   # R b3 5 b7
+            'm_maj7':   [0, 3, 7, 11],   # R b3 5 7
+            'dom7':     [0, 4, 7, 10],   # R 3 5 b7
+            'sus':      [0, 5, 7, 12],   # R 4 5 R (Assume sus4)
+            'sus4':     [0, 5, 7, 12],   # R 4 5 R
+            'sus2':     [0, 2, 7, 12],   # R 2 5 R
+            'sus7':     [0, 5, 7, 10],   # R 4 5 b7
+            'o7':       [0, 3, 6, 9],    # R b3 b5 bb7
+            'o':        [0, 3, 6, 12],   # R b3 b5 R
+            'ø7':       [0, 3, 6, 10],   # R b3 b5 b7
+            'aug':      [0, 4, 8, 12],   # R 3 #5 R
+            'power':    [0, 7, 12, 19],  # R 5 R 5
+            'o_maj7':   [0, 3, 6, 11],   # R b3 b5 7
+        }
+
+        # Legacy Templates (kept for fallback or specific styles)
+        # Major chord voicings (Root, 3, 5, 9)
         self.maj = {
-            'v_0': [0, 4, 7],                # Root + M3 + P5 (basic triad)
-            'v_1': [0, 4, 7, 12],            # Add octave
-            'v_2': [0, 4, 7, 14],            # Add 9th
-            'v_3': [0, 4, 7, 16],            # Add 9th up octave
-            'v_4': [0, 4, 7, 14, 17],        # Add 9th and 11th
-            'v_5': [0, 4, 7, 14, 21],        # Add 9th and 13th
-            'v_6': [0, 4, 7, 11]             # Add major 7th (maj add 7)
+            'v_0': [0, 4, 7, 12],            # R-3-5-R (Fixed to 4 notes)
+            'v_1': [0, 4, 7, 12],            # R-3-5-R
+            'v_2': [0, 4, 7, 14],            # R-3-5-9
+            'v_3': [0, 4, 7, 12],           # R-3-R-5 (Open)
+            'v_4': [0, 4, 7, 12],           # R-5-R-3 (Open)
+            'v_5': [0, 4, 7, 14],            # R-3-5-9
+            'v_6': [0, 4, 7, 12]                 # Backup
         }
         
-        # Major 7th voicings (basic sound = 3 + 7)
+        # Major 7th voicings (Root, 3, 7, 9, 5)
         self.maj7 = {
-            'v_0': [0, 4, 7, 11],            # Root + M3 + P5 + M7 (complete tetrad)
-            'v_1': [0, 4, 11, 14],           # Root + M3 + M7 + 9 (no 5th)
-            'v_2': [0, 4, 7, 11, 14],        # Add 9th to complete tetrad
-            'v_3': [0, 4, 7, 11, 17],        # Add 11th
-            'v_4': [0, 4, 7, 11, 18],        # Add #11 (lydian)
-            'v_5': [0, 4, 7, 11, 14, 21],    # Full with 9th and 13th
-            'v_6': [0, 4, 7, 11, 14, 18]     # Add 9th and #11
+            'v_0': [0, 4, 7, 11],            # R-3-5-7
+            'v_1': [0, 11, 14, 16],          # R-7-9-3 (Rootless A-form-ish idea, but applied w/ root)
+            'v_2': [0, 4, 7, 11, 14],        # R-3-5-7-9
+            'v_3': [0, 4, 11, 14],           # R-3-7-9 (Shell)
+            'v_4': [0, 7, 11, 16],           # R-5-7-3 (Open)
+            'v_5': [0, 4, 7, 11, 14],        # R-3-5-7-9
+            'v_6': [0, 4, 7, 11]             # R-3-5-7
         }
         
-        # Minor chord voicings (basic sound = m3 + 5)
+        # Minor chord voicings (Root, b3, 5, 9)
         self.m = {
-            'v_0': [0, 3, 7],                # Root + m3 + P5 (basic triad)
-            'v_1': [0, 3, 7, 12],            # Add octave
-            'v_2': [0, 3, 7, 14],            # Add 9th
-            'v_3': [0, 3, 7, 15],            # Add 9th up octave
-            'v_4': [0, 3, 7, 14, 17],        # Add 9th and 11th
-            'v_5': [0, 3, 7, 10],            # Add minor 7th (becomes m7)
-            'v_6': [0, 3, 7, 11]             # Add major 7th (m/maj7)
+            'v_0': [0, 3, 7],                # R-b3-5
+            'v_1': [0, 3, 7, 12],            # R-b3-5-R
+            'v_2': [0, 3, 7, 14],            # R-b3-5-9
+            'v_3': [0, 3, 12, 19],           # R-b3-R-5
+            'v_4': [0, 7, 12, 15],           # R-5-R-b3
+            'v_5': [0, 3, 7, 14],            # R-b3-5-9
+            'v_6': [0, 3, 7]                 # Backup
         }
         
-        # Minor 7th voicings (basic sound = m3 + b7)
+        # Minor 7th voicings (Root, b3, b7, 9, 5)
         self.m7 = {
-            'v_0': [0, 3, 7, 10],            # Root + m3 + P5 + b7 (complete tetrad)
-            'v_1': [0, 3, 10, 14],           # Root + m3 + b7 + 9 (no 5th)
-            'v_2': [0, 3, 7, 10, 14],        # Add 9th to complete tetrad
-            'v_3': [0, 3, 7, 10, 17],        # Add 11th
-            'v_4': [0, 3, 7, 10, 14, 17],    # Add 9th and 11th
-            'v_5': [0, 3, 7, 10, 14, 21],    # Add 9th and 13th
-            'v_6': [0, 3, 7, 10, 13]         # Add b9
+            'v_0': [0, 3, 7, 10],            # R-b3-5-b7
+            'v_1': [0, 10, 14, 15],          # R-b7-9-b3 (Shell + 9)
+            'v_2': [0, 3, 7, 10, 14],        # R-b3-5-b7-9
+            'v_3': [0, 3, 10, 14],           # R-b3-b7-9 (Shell)
+            'v_4': [0, 7, 10, 15],           # R-5-b7-b3 (Open)
+            'v_5': [0, 3, 7, 10, 14],        # R-b3-5-b7-9
+            'v_6': [0, 3, 7, 10]             # R-b3-5-b7
         }
         
-        # Dominant 7th voicings (basic sound = 3 + b7) - MOST IMPORTANT
+        # Dominant 7th voicings (Root, 3, b7, 9, 13)
         self.dom7 = {
-            'v_0': [0, 4, 7, 10],            # Root + M3 + P5 + b7 (complete tetrad!)
-            'v_1': [0, 4, 10, 14],           # Root + M3 + b7 + 9 (no 5th, add 9)
-            'v_2': [0, 10, 16, 22],          # b7 in bass register, M3 and b7 up octave
-            'v_3': [0, 4, 7, 10, 14],        # Add 9th to complete tetrad
-            'v_4': [0, 4, 7, 10, 17],        # Add 11th
-            'v_5': [0, 4, 10, 14, 21],       # Full with 9th and 13th
-            'v_6': [0, 4, 7, 10, 13]         # Add b9 (altered)
+            'v_0': [0, 4, 7, 10],            # R-3-5-b7
+            'v_1': [0, 10, 14, 16],          # R-b7-9-3 (Shell + 9)
+            'v_2': [0, 4, 7, 10, 14],        # R-3-5-b7-9
+            'v_3': [0, 4, 10, 14],           # R-3-b7-9 (Shell)
+            'v_4': [0, 7, 10, 16],           # R-5-b7-3 (Open)
+            'v_5': [0, 4, 10, 14, 21],       # R-3-b7-9-13 (Rich)
+            'v_6': [0, 4, 7, 10]             # R-3-5-b7
         }
         
-        # Half-diminished (ø7) voicings (basic sound = m3 + b5 + b7)
+        # Half-diminished (ø7)
         self.ø7 = {
-            'v_0': [0, 15, 18, 22],          # Root + m3 + b5 + b7
-            'v_1': [0, 18, 22, 27],          # Spread voicing
-            'v_2': [0, 15, 22, 26],          # With 9th
-            'v_3': [0, 15, 18, 22, 26],      # Full with 9th
-            'v_4': [0, 14, 15, 18, 22],      # 9th color
-            'v_5': [0, 15, 18, 22, 27],      # Wide spread
-            'v_6': [0, 18, 22, 26, 30]       # Upper extensions
+            'v_0': [0, 3, 6, 10],            # R-b3-b5-b7
+            'v_1': [0, 3, 6, 10, 15],        # R-b3-b5-b7-11
+            'v_2': [0, 3, 6, 10],
+            'v_3': [0, 3, 6, 10],
+            'v_4': [0, 6, 10, 15],
+            'v_5': [0, 3, 6, 10],
+            'v_6': [0, 3, 6, 10]
         }
         
-        # Diminished 7th voicings (symmetrical structure)
+        # Diminished 7th (o7)
         self.o7 = {
-            'v_0': [0, 15, 18, 21],          # Root + m3 + dim5 + dim7
-            'v_1': [0, 15, 21, 24],          # Spread
-            'v_2': [0, 15, 18, 21, 27],      # Extended
-            'v_3': [0, 9, 15, 21],           # Different inversion feel
-            'v_4': [0, 15, 18, 21, 24],      # Full
-            'v_5': [0, 15, 21, 27],          # Wide
-            'v_6': [0, 15, 18, 24, 27]       # Very open
+            'v_0': [0, 3, 6, 9],             # R-b3-b5-bb7
+            'v_1': [0, 3, 6, 9, 14],         # Add 9 (maj9)
+            'v_2': [0, 3, 6, 9],
+            'v_3': [0, 3, 6, 9],
+            'v_4': [0, 3, 6, 9],
+            'v_5': [0, 3, 6, 9],
+            'v_6': [0, 3, 6, 9]
         }
         
-        # Diminished triad voicings
+        # Diminished triad (o)
         self.o = {
-            'v_0': [0, 15, 18],              # Root + m3 + dim5
-            'v_1': [0, 15, 18, 24],          # Add octave
-            'v_2': [0, 9, 15, 18],           # Different spacing
-            'v_3': [0, 15, 18, 21],          # Add dim7
-            'v_4': [0, 12, 15, 18],          # Doubled root
-            'v_5': [0, 15, 18, 24, 27],      # Extended
-            'v_6': [0, 15, 21, 27]           # Wide spread
+            'v_0': [0, 3, 6, 12],            # R-b3-b5-R
+            'v_1': [0, 3, 6],
+            'v_2': [0, 3, 6],
+            'v_3': [0, 3, 6],
+            'v_4': [0, 3, 6],
+            'v_5': [0, 3, 6],
+            'v_6': [0, 3, 6]
         }
         
-        # Sus4 voicings (basic sound = 4 + 5)
+        # Sus4 (Root, 4, 5, b7, 9)
         self.sus = {
-            'v_0': [0, 17, 19],              # Root + P4 + P5
-            'v_1': [0, 17, 19, 24],          # Add octave
-            'v_2': [0, 12, 17, 19],          # Doubled root
-            'v_3': [0, 17, 19, 26],          # Add 9th
-            'v_4': [0, 14, 17, 19],          # 9th color
-            'v_5': [0, 17, 19, 24, 26],      # Full with 9th
-            'v_6': [0, 14, 17, 19, 24]       # Complete
+            'v_0': [0, 5, 7],                # R-4-5
+            'v_1': [0, 5, 7, 10],            # R-4-5-b7
+            'v_2': [0, 5, 7, 10, 14],        # R-4-5-b7-9
+            'v_3': [0, 5, 10, 14],           # R-4-b7-9
+            'v_4': [0, 7, 12, 17],           # R-5-R-4
+            'v_5': [0, 5, 7, 10, 14, 21],    # R-4-5-b7-9-13
+            'v_6': [0, 5, 7, 12]             # R-4-5-R
         }
         
-        # Sus7 voicings (basic sound = 4 + b7)
-        self.sus7 = {
-            'v_0': [0, 17, 22],              # Root + P4 + b7
-            'v_1': [0, 17, 19, 22],          # Add P5
-            'v_2': [0, 10, 17, 22],          # 7th in bass register
-            'v_3': [0, 17, 22, 26],          # Add 9th
-            'v_4': [0, 14, 17, 22],          # 9th color
-            'v_5': [0, 17, 19, 22, 26],      # Full with 9th
-            'v_6': [0, 14, 17, 19, 22]       # Complete
-        }
+        self.sus7 = self.sus
+        self.sus4 = self.sus
         
-        # Sus2 voicings (basic sound = 2 + 5)
+        # Sus2
         self.sus2 = {
-            'v_0': [0, 14, 19],              # Root + M2 + P5
-            'v_1': [0, 14, 19, 24],          # Add octave
-            'v_2': [0, 12, 14, 19],          # Doubled root
-            'v_3': [0, 14, 19, 26],          # Add 9th (same as M2)
-            'v_4': [0, 14, 19, 24, 26],      # Extended
-            'v_5': [0, 7, 14, 19],           # Add low fifth
-            'v_6': [0, 14, 19, 21]           # Add color tone
+            'v_0': [0, 2, 7],                # R-2-5
+            'v_1': [0, 2, 7, 12],
+            'v_2': [0, 2, 7, 14],
+            'v_3': [0, 7, 14, 19],
+            'v_4': [0, 2, 7],
+            'v_5': [0, 2, 7],
+            'v_6': [0, 2, 7]
         }
         
-        # Sus4 specific
-        self.sus4 = {
-            'v_0': [0, 17, 19],              # Root + P4 + P5
-            'v_1': [0, 17, 19, 24],          # Add octave
-            'v_2': [0, 12, 17, 19],          # Doubled root
-            'v_3': [0, 17, 19, 26],          # Add 9th
-            'v_4': [0, 14, 17, 19],          # 9th color
-            'v_5': [0, 17, 19, 24, 26],      # Full with 9th
-            'v_6': [0, 14, 17, 19, 24]       # Complete
-        }
-        
-        # Augmented voicings (altered 5th)
+        # Augmented
         self.aug = {
-            'v_0': [0, 16, 20],              # Root + M3 + #5 (altered 5th!)
-            'v_1': [0, 16, 20, 24],          # Add octave
-            'v_2': [0, 12, 16, 20],          # Doubled root
-            'v_3': [0, 16, 20, 26],          # Add 9th
-            'v_4': [0, 14, 16, 20],          # 9th color
-            'v_5': [0, 16, 20, 24, 28],      # Extended
-            'v_6': [0, 16, 20, 24, 26]       # Full with 9th
+            'v_0': [0, 4, 8],                # R-3-#5
+            'v_1': [0, 4, 8, 10],            # R-3-#5-b7
+            'v_2': [0, 4, 8, 12],
+            'v_3': [0, 4, 8],
+            'v_4': [0, 4, 8],
+            'v_5': [0, 4, 8],
+            'v_6': [0, 4, 8]
         }
         
-        # Minor major 7th voicings (basic sound = m3 + M7)
+        # Minor major 7th
         self.m_maj7 = {
-            'v_0': [0, 15, 23],              # Root + m3 + M7
-            'v_1': [0, 15, 19, 23],          # Add P5
-            'v_2': [0, 11, 15, 23],          # 7th in bass register
-            'v_3': [0, 15, 23, 26],          # Add 9th
-            'v_4': [0, 14, 15, 23],          # 9th color
-            'v_5': [0, 15, 19, 23, 26],      # Full with 9th
-            'v_6': [0, 14, 15, 19, 23]       # Complete
+            'v_0': [0, 3, 7, 11],            # R-b3-5-7
+            'v_1': [0, 3, 7, 11, 14],        # R-b3-5-7-9
+            'v_2': [0, 3, 7, 11],
+            'v_3': [0, 3, 7, 11],
+            'v_4': [0, 3, 7, 11],
+            'v_5': [0, 3, 7, 11],
+            'v_6': [0, 3, 7, 11]
         }
         
-        # Major 6th voicings (basic sound = 3 + 6)
+        # Major 6th
         self.maj6 = {
-            'v_0': [0, 16, 21],              # Root + M3 + M6
-            'v_1': [0, 16, 19, 21],          # Add P5
-            'v_2': [0, 9, 16, 21],           # 6th in bass register
-            'v_3': [0, 16, 21, 26],          # Add 9th
-            'v_4': [0, 14, 16, 21],          # 9th color
-            'v_5': [0, 16, 19, 21, 26],      # Full with 9th
-            'v_6': [0, 14, 16, 19, 21]       # Complete
+            'v_0': [0, 4, 7, 9],             # R-3-5-6
+            'v_1': [0, 4, 7, 9, 14],         # R-3-5-6-9
+            'v_2': [0, 3, 7, 9],              # ??? (Wait, 3 is b3. Should be 4). 
+                                             # Fixed: maj6 is 0, 4, 7, 9.
+            'v_3': [0, 4, 7, 9],
+            'v_4': [0, 4, 7, 9],
+            'v_5': [0, 4, 7, 9],
+            'v_6': [0, 4, 7, 9]
         }
+        # Fixed v_2 above:
+        self.maj6['v_2'] = [0, 4, 7, 9]
         
-        # Minor 6th voicings (basic sound = m3 + 6)
+        # Minor 6th
         self.m6 = {
-            'v_0': [0, 15, 21],              # Root + m3 + M6
-            'v_1': [0, 15, 19, 21],          # Add P5
-            'v_2': [0, 9, 15, 21],           # 6th in bass register
-            'v_3': [0, 15, 21, 26],          # Add 9th
-            'v_4': [0, 14, 15, 21],          # 9th color
-            'v_5': [0, 15, 19, 21, 26],      # Full with 9th
-            'v_6': [0, 14, 15, 19, 21]       # Complete
+            'v_0': [0, 3, 7, 9],             # R-b3-5-6
+            'v_1': [0, 3, 7, 9, 14],         # R-b3-5-6-9
+            'v_2': [0, 3, 7, 9],
+            'v_3': [0, 3, 7, 9],
+            'v_4': [0, 3, 7, 9],
+            'v_5': [0, 3, 7, 9],
+            'v_6': [0, 3, 7, 9]
         }
         
-        # Diminished major 7th voicings (basic sound = m3 + dim5 + M7)
+        # o_maj7
         self.o_maj7 = {
-            'v_0': [0, 15, 18, 23],          # Root + m3 + dim5 + M7
-            'v_1': [0, 18, 23, 27],          # Spread
-            'v_2': [0, 15, 23, 26],          # With 9th
-            'v_3': [0, 15, 18, 23, 26],      # Full with 9th
-            'v_4': [0, 14, 15, 18, 23],      # 9th color
-            'v_5': [0, 15, 18, 23, 27],      # Wide
-            'v_6': [0, 18, 23, 26, 30]       # Upper extensions
+            'v_0': [0, 3, 6, 11],
+            'v_1': [0, 3, 6, 11],
+            'v_2': [0, 3, 6, 11],
+            'v_3': [0, 3, 6, 11],
+            'v_4': [0, 3, 6, 11],
+            'v_5': [0, 3, 6, 11],
+            'v_6': [0, 3, 6, 11]
         }
         
-        # Power chord voicings (just root + 5th)
+        # Power
         self.power = {
-            'v_0': [0, 19],                  # Basic power chord (root + P5)
-            'v_1': [0, 19, 24],              # Add octave
-            'v_2': [0, 12, 19],              # Doubled root
-            'v_3': [0, 7, 12, 19, 24],       # Full power
-            'v_4': [0, 12, 19],              # Octave power
-            'v_5': [0, 7, 19],               # Open power
-            'v_6': [0, 7, 12, 19, 26]        # Extended octave power
+            'v_0': [0, 7, 12],
+            'v_1': [0, 7, 12, 19],
+            'v_2': [0, 7, 12],
+            'v_3': [0, 7, 12],
+            'v_4': [0, 7, 12],
+            'v_5': [0, 7, 12],
+            'v_6': [0, 7, 12]
         }
         
-        # No chord (silence)
+        # No chord
         self.noChord = {
-            'v_0': [0, 0, 0, 0], 'v_1': [0, 0, 0, 0], 'v_2': [0, 0, 0, 0],
-            'v_3': [0, 0, 0, 0], 'v_4': [0, 0, 0, 0], 'v_5': [0, 0, 0, 0],
-            'v_6': [0, 0, 0, 0]
+            'v_0': [0], 'v_1': [0], 'v_2': [0],
+            'v_3': [0], 'v_4': [0], 'v_5': [0],
+            'v_6': [0]
         }
                
         #TODO: define voicing for guitar
@@ -274,7 +279,7 @@ class Voicing:
         #Define the voicing dictionaries for the chords
         self.chord_voicing = {'maj': self.maj, 'maj7': self.maj7, 'm': self.m, 'm7': self.m7, 'dom7': self.dom7, 
                               'ø7': self.ø7, 'o7': self.o7, 'o': self.o, 'sus': self.sus, 'sus7': self.sus7, 
-                              'sus2': self.sus2, 'sus4': self.sus4, 'm6': self.m6, 'power': self.power, 'o': self.o, 
+                              'sus2': self.sus2, 'sus4': self.sus4, 'm6': self.m6, 'power': self.power, 
                               'm_maj7': self.m_maj7, 'maj6': self.maj6, 'aug': self.aug, 'o_maj7': self.o_maj7, 'N.C.': self.noChord}
     #-----------------------------------------------------------------------
     def listToIgnore(self):
@@ -471,6 +476,182 @@ class Voicing:
         midi_sequence = np.array(midi_sequence, dtype=int)
         return midi_sequence, status
     
+    def generate_voicing_candidates(self, root, nature):
+        """
+        Generate voicing candidates using strict Drop 2 and Drop 3 logic.
+        
+        Definition:
+        1. Left Hand: Root (in Bass register, usually C2-C3).
+        2. Right Hand: 
+           - Start with 4-note Closed Block (e.g. R-3-5-7 or R-3-5-R).
+           - Invert the Closed Block (0, 1, 2, 3 inversions).
+           - Apply Drop 2: Drop 2nd note from top an octave down (usually ends up between LH and RH).
+           - Apply Drop 3: Drop 3rd note from top an octave down.
+        """
+        candidates = []
+        
+        # 1. Determine Closed Stack relative to root=0
+        if nature == 'N.C.':
+            return []
+            
+        stack = self.closed_stacks.get(nature, [0, 4, 7, 12]) # Default to Major Add Octave
+        
+        # 2. Generate Inversions of the Closed Stack (still relative to 0)
+        # stack is e.g. [0, 4, 7, 12]
+        # inv0: [0, 4, 7, 12]
+        # inv1: [4, 7, 12, 12] -> [4, 7, 12, 12] normalized?
+        # Better: Invert by taking bottom note + 12.
+        
+        base_stack = sorted(stack)
+        inversions = []
+        
+        # Create 4 inversions
+        current = list(base_stack)
+        for _ in range(4):
+            inversions.append(sorted(current))
+            # Invert: remove bottom, add it +12
+            bottom = current[0]
+            current = current[1:] + [bottom + 12]
+            current = sorted(current)
+            
+        # 3. For each inversion, generate Closed, Drop 2, Drop 3
+        # And transpose to valid registers
+        
+        # Target Range for Upper Structure (before drop):
+        # We want the resulting CHORD to sit nicely.
+        # Usually checking Result range is better.
+        
+        for inv in inversions:
+            # inv is relative to 0. e.g. [0, 4, 7, 12]
+            
+            # --- Type A: Closed (Reference, maybe useful) ---
+            # candidates.append(self._create_candidate(root, inv, 'Closed'))
+            
+            # --- Type B: Drop 2 ---
+            # Drop 2nd highest note octave down
+            if len(inv) >= 2:
+                d2 = list(inv)
+                d2[-2] -= 12
+                candidates.extend(self._create_realizations(root, d2, nature))
+
+            # --- Type C: Drop 3 ---
+            # Drop 3rd highest note octave down
+            if len(inv) >= 3:
+                d3 = list(inv)
+                d3[-3] -= 12
+                candidates.extend(self._create_realizations(root, d3, nature))
+                
+        # If no candidates found (e.g. strict range checks failed), fallback to simple
+        if not candidates:
+             return [[root, root+4, root+7, root+12]]
+             
+        return candidates
+
+    def _create_realizations(self, root, intervals, nature):
+        """
+        Create concrete MIDI voicings from relative intervals (Drop applied)
+        by trying different octaves.
+        
+        intervals: relative intervals (e.g. [-5, 0, 4, 11])
+        """
+        out = []
+        sorted_intervals = sorted(intervals)
+        
+        # Try centering the voicing
+        # Base Root usually C2(36) or C3(48). 
+        # Left Hand usually plays Root at C2 or C3.
+        
+        # We assume 'intervals' captures the relative shape of the RH + Dropped Note.
+        # But we MUST ADD The LEft Hand Root explicitly if it's not covered?
+        # The user says: "Root is on the left hand... Then the triad [dropped] is on the right"
+        # The dropped note falls "in between".
+        
+        # So structure: [BassRoot] + [UpperStructure (with Drop applied)]
+        
+        # Iterate possible root octaves for the Left Hand
+        for bass_oct in [36, 48]: # C2, C3
+            actual_root = root % 12 + bass_oct # e.g. 50 (D3) or 38 (D2)
+            if actual_root > 55: actual_root -= 12 # Keep bass low-ish
+            if actual_root < 36: actual_root += 12
+            
+            # Now place the Upper Structure
+            # We want the Upper Structure to be "above" the bass, or "wrapping" it?
+            # Usually above.
+            # The intervals are relative to 0.
+            # We need to shift them so they sit in the middle register (C3-C5).
+            
+            # Find loop of transpositions for the upper structure
+            # e.g. center around C4 (60)
+            
+            # Get centroid of intervals
+            avg_int = sum(sorted_intervals)/len(sorted_intervals)
+            
+            # We want avg_val + shift ~ 60
+            # shift ~ 60 - avg_int
+            
+            base_shift = int(60 - avg_int)
+            # Round to nearest octave (12)
+            base_shift = round(base_shift / 12) * 12
+            
+            # Try a few shifts around there
+            for oct_shift in [base_shift - 12, base_shift, base_shift + 12]:
+                
+                # Apply shift to upper structure
+                upper_notes = [n + oct_shift for n in sorted_intervals] # Absolute MIDI notes now?
+                # Wait, intervals were relative to 0. 
+                # If we add oct_shift (e.g. 60), we treat key of C=0.
+                # But we are in key of Root.
+                # So we need to add Root%12 too? 
+                # Yes. intervals are relative to Root.
+                
+                # Real notes = Root + Interval + OctaveShift
+                # But wait, logic above: "intervals" are relative to local 0.
+                
+                real_upper = [root % 12 + n + oct_shift for n in sorted_intervals]
+                
+                # Combine Bass + Upper
+                # Bass = actual_root
+                
+                # Check for clash: if lowest upper note is below bass?
+                min_upper = min(real_upper)
+                if min_upper <= actual_root:
+                    continue # Upper structure shouldn't go below bass root usually
+                    
+                # Create voicing
+                voicing = [actual_root] + real_upper
+                
+                if self.is_valid_voicing(voicing):
+                    out.append(voicing)
+                    
+        return out
+
+    def is_valid_voicing(self, voicing):
+        """Check for muddiness and range"""
+        if not voicing: return False
+        
+        # Range check: Piano 21 to 108
+        if min(voicing) < 21 or max(voicing) > 108:
+            return False
+            
+        # Low Interval Limit (roughly)
+        # No intervals < 3 semitones below E3 (52)
+        # No intervals < 5 semitones below C3 (48)
+        
+        notes = sorted(voicing)
+        for i in range(len(notes)-1):
+            n1 = notes[i]
+            n2 = notes[i+1]
+            interval = n2 - n1
+            
+            if interval == 0: continue # Unison is okay? Maybe avoid doubling thirds.
+            
+            if n1 < 48 and interval < 5: # Below C3, no thirds/seconds
+               return False
+            if n1 < 52 and interval < 3: # Below E3, no seconds
+               return False
+               
+        return True
+
     #-----------------------------------------------------------------------
     # Add the voicing to the sequence
     # DOT (.) = START of chord. Everything until next DOT is ONE chord.
@@ -527,26 +708,35 @@ class Voicing:
                     chord_label = token
                     
                 elif token in self.natures:
-                    # Get voicing for this chord nature
-                    all_voicings = []
-                    for template_idx in range(mod):
-                        template_voicing = [x + root for x in self.chord_voicing[token][self.voicing[template_idx]]]
-                        all_voicings.append(template_voicing)
+                    # Get all possible voicing candidates (Closed, Drop 2, Drop 3 at various octaves)
+                    all_voicings = self.generate_voicing_candidates(root, token)
                     
                     if previous_voicing is not None:
-                        midi = self.select_best_voicing(previous_voicing, all_voicings)
+                        # Select the one that connects smoothest to previous chord
+                        midi = self.select_best_voicing(previous_voicing, all_voicings, prev_root=None, curr_root=root)
                     else:
-                        midi = all_voicings[0]
+                        # First chord: Pick a candidate in the middle register
+                        # Bias towards C3/C4 for root
+                        def root_clarity(v):
+                            if not v: return 100
+                            # Root is usually the lowest note here
+                            return abs(v[0] - 48) # Distance from C3
+                            
+                        midi = min(all_voicings, key=root_clarity) if all_voicings else [root, root+4, root+7]
                     
                     chord_label = token
                     
                 elif token in add_dict:
                     new_note = root + add_dict[token]
                     if new_note not in midi:
+                        filled = False
                         for idx in range(len(midi)):
                             if midi[idx] == 0:
                                 midi[idx] = new_note
+                                filled = True
                                 break
+                        if not filled:
+                            midi.append(new_note)
                     if token == 'add b9' or token == 'add #9':
                         if (root + 14) in midi:
                             midi[midi.index(root + 14)] = 0
@@ -568,10 +758,14 @@ class Voicing:
                             new_note -= 1
                         elif '#' in token:
                             new_note += 1
+                        filled = False
                         for idx in range(len(midi)):
                             if midi[idx] == 0:
                                 midi[idx] = new_note
+                                filled = True
                                 break
+                        if not filled:
+                            midi.append(new_note)
                                 
                 elif token == '/':
                     has_slash = True
@@ -616,13 +810,21 @@ class Voicing:
                         bass_pitch = slash_bass % 12
                         notes = [x for x in notes if x % 12 != bass_pitch]
                         
-                        # Ensure all remaining notes are ABOVE the bass
+                        # Ensure all remaining notes are ABOVE the bass AND respect low interval limits
                         adjusted_notes = []
                         for n in notes:
+                            # 1. Must be above bass
                             while n <= slash_bass:
                                 n += 12
+                            
+                            # 2. Low interval limit check (avoid muddy minor 2nds/Major 2nds deep in bass)
+                            # If interval to bass is small (< 5 semitones) and bass is low (< 55 / G3)
+                            # Shift up an octave
+                            if (n - slash_bass) < 5 and slash_bass < 55:
+                                n += 12
+                                
                             adjusted_notes.append(n)
-                        
+                            
                         # Sort and rebuild: bass first, then rest ascending
                         adjusted_notes = sorted(adjusted_notes)
                         notes = [slash_bass] + adjusted_notes
@@ -724,21 +926,16 @@ class Voicing:
     
     def select_best_voicing(self, previous_voicing, candidate_voicings, prev_root=None, curr_root=None):
         """
-        Select voicing using Berklee voice leading principles.
-        
-        Follows proper jazz/pop voice leading:
-        1. Root stays in bass
-        2. Focus on moving 3 and 7 smoothly
-        3. Use different rules based on root motion (4th/5th vs 2nd vs 3rd)
+        Select best voicing from candidates based on voice leading efficiency.
         
         Args:
             previous_voicing: List of MIDI notes from previous chord
-            candidate_voicings: List of possible voicings (7 templates)
-            prev_root: Previous chord root (MIDI note)
-            curr_root: Current chord root (MIDI note)
+            candidate_voicings: List of pre-generated concrete voicings (Closed, Drop2, Drop3)
+            prev_root: Ignored
+            curr_root: Ignored
             
         Returns:
-            Optimized voicing following voice leading principles
+            The best voicing from the candidates list
         """
         if not previous_voicing or not candidate_voicings:
             return candidate_voicings[0] if candidate_voicings else [0, 4, 7, 12]
@@ -750,17 +947,27 @@ class Voicing:
         best_voicing = None
         min_distance = float('inf')
         
-        # Try each candidate voicing template
+        # Calculate center of previous voicing to bias towards keeping register
+        prev_avg = sum(prev_notes) / len(prev_notes) if prev_notes else 60
+        
         for voicing in candidate_voicings:
-            # Optimize this voicing by adjusting octaves for best voice leading
-            optimized = self.optimize_voicing_octaves(prev_notes, voicing)
+            # Filter out empty voicings
+            if not voicing: continue
             
-            # Calculate total voice movement
-            distance = self.calculate_optimized_distance(prev_notes, optimized)
+            # Calculate total voice movement distance
+            # calculate_optimized_distance does a good job matching voice-to-voice
+            distance = self.calculate_optimized_distance(prev_notes, voicing)
             
-            if distance < min_distance:
-                min_distance = distance
-                best_voicing = optimized
+            # Add a small penalty for extreme register shifts (drift)
+            # This helps keep the progression centered if movement is equal
+            curr_avg = sum(voicing) / len(voicing)
+            drift_penalty = abs(curr_avg - prev_avg) * 0.1
+            
+            total_score = distance + drift_penalty
+            
+            if total_score < min_distance:
+                min_distance = total_score
+                best_voicing = voicing
         
         return best_voicing if best_voicing is not None else candidate_voicings[0]
     
