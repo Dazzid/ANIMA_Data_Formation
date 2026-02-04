@@ -45,47 +45,89 @@ NOTE_NAMES_53TET = [
 ]
 
 MODAL_SCALE_TYPES = {
-    'type_0': {
-        'name': 'Major',
-        'hc_distances': [0, 9, 9, 4, 9, 9, 9],  # Standard 12-TET Major
-        'hc_distances_minor': [0, 9, 4, 9, 9, 4, 9], # Standard 12-TET Natural Minor
-        'description': 'Standard major/minor scale (baseline 12-TET)'
+    # Type 0: Standard 12-TET
+    'type_0_major': {
+        'name': 'Standard_Major',
+        'hc_distances': [0, 9, 9, 4, 9, 9, 9],
+        'description': 'Standard 12-TET Major'
     },
-    'type_1': {
+    'type_0_minor': {
+        'name': 'Standard_Minor',
+        'hc_distances': [0, 9, 4, 9, 9, 4, 9],
+        'description': 'Standard 12-TET Natural Minor'
+    },
+
+    # Type 1: Neutral
+    'type_1_neutral': {
         'name': 'Neutral',
         'hc_distances': [0, 8, 7, 7, 9, 8, 7],
-        'hc_distances_minor': [0, 7, 7, 8, 7, 7, 9],
-        'description': 'Neutral mode with neutral intervals'
+        'description': 'Neutral mode'
     },
-    'type_2': {
-        'name': 'upMajor',
+    'type_1_minor': { # Rotated
+        'name': 'Neutral_Minor',
+        'hc_distances': [0, 7, 7, 8, 7, 7, 9],
+        'description': 'Neutral mode (Minor rotation)'
+    },
+
+    # Type 2: UpMajor / SubMinor (Note: Corrected Logic)
+    'type_2_upmajor': {
+        'name': 'UpMajor',
         'hc_distances': [0, 10, 9, 3, 9, 10, 9],
-        'hc_distances_minor': [0, 9, 3, 10, 9, 3, 9],
-        'description': 'Up-major mode'
+        'description': 'UpMajor mode'
     },
-    'type_3': {
+    
+    'type_2_subminor': {
+        'name': 'SubMinor',
+        'hc_distances': [0, 9, 3, 10, 9, 3, 9],
+        'description': 'SubMinor mode (derived from UpMajor)'
+    },
+
+    # Type 3: H_3rd_H_7th
+    'type_3_major': {
         'name': 'H_3rd_H_7th',
         'hc_distances': [0, 9, 8, 5, 9, 8, 5],
-        'hc_distances_minor': [0, 5, 9, 9, 8, 5, 9],
         'description': 'Harmonic 3rd and 7th mode'
     },
-    'type_4': {
+    'type_3_minor': {
+        'name': 'H_3rd_H_7th_Minor',
+        'hc_distances': [0, 5, 9, 9, 8, 5, 9],
+        'description': 'Harmonic 3rd and 7th mode (Minor rotation)'
+    },
+
+    # Type 4: Major_v2
+    'type_4_major': {
         'name': 'Major_v2',
         'hc_distances': [0, 9, 9, 5, 8, 8, 9],
-        'hc_distances_minor': [0, 9, 5, 9, 9, 5, 8],
         'description': 'Alternative major mode'
     },
-    'type_5': {
+    'type_4_minor': {
+        'name': 'Major_v2_Minor',
+        'hc_distances': [0, 9, 5, 9, 9, 5, 8],
+        'description': 'Alternative major mode (Minor rotation)'
+    },
+
+    # Type 5: Neutral_N
+    'type_5_neutral_n': {
         'name': 'Neutral_N',
         'hc_distances': [0, 8, 7, 7, 9, 5, 10],
-        'hc_distances_minor': [0, 10, 7, 8, 7, 7, 9],
         'description': 'Neutral N mode'
     },
-    'type_6': {
-        'name': 'Neutral_N_vII',
+    'type_5_neutral_n_minor': {
+        'name': 'Neutral_N_Minor',
+        'hc_distances': [0, 10, 7, 8, 7, 7, 9],
+        'description': 'Neutral N mode (Minor rotation)'
+    },
+
+    # Type 6: Neutral_
+    'type_6_neutral': {
+        'name': 'Neutral_N',
         'hc_distances': [0, 8, 8, 6, 9, 8, 8],
-        'hc_distances_minor': [0, 8, 6, 8, 8, 6, 9],
         'description': 'Neutral N mode with variation'
+    },
+    'type_6_neutral_minor': {
+        'name': 'Neutral_n',
+        'hc_distances': [0, 8, 6, 8, 8, 6, 9],
+        'description': 'Neutral N mode with variation (Minor rotation)'
     }
 }
 
@@ -380,7 +422,8 @@ def convert_midi_to_53tet(input_midi_path, scale_type='type_1', output_dir=None,
     
     if key is None:
         import re
-        # Case insensitive match for key in(?:major|minor))', input_path.stem, re.IGNORECASE)
+        # Case insensitive match for key in filename (e.g. Name_Key_Tonality)
+        match = re.search(r'_([a-zA-Z#]+)_(major|minor)$', input_path.stem, re.IGNORECASE)
         if match:
             key = match.group(1)
             tonality_str = match.group(2).lower()
@@ -407,15 +450,10 @@ def convert_midi_to_53tet(input_midi_path, scale_type='type_1', output_dir=None,
     tonic_position = key_to_position.get(key, 0)
     config = MODAL_SCALE_TYPES[scale_type]
     
-    # Select appropriate distances based on tonality
-    if is_minor and 'hc_distances_minor' in config:
-        hc_distances = config['hc_distances_minor']
-        print(f"Using Minor scale definition for {scale_type}")
-    else:
-        hc_distances = config['hc_distances']
+    # Just use the defined distances for this specific type
+    hc_distances = config['hc_distances']
     
-    chromatic_scale = build_chromatic_scale_53tet(hc_distances, root_step=0, tonic_position=tonic_position, is_minor=is_minor
-    chromatic_scale = build_chromatic_scale_53tet(hc_distances, root_step=0, tonic_position=tonic_position)
+    chromatic_scale = build_chromatic_scale_53tet(hc_distances, root_step=0, tonic_position=tonic_position, is_minor=is_minor)
     
     mid = mido.MidiFile(input_path)
     mpe_midi = mido.MidiFile(type=mid.type, ticks_per_beat=mid.ticks_per_beat)
@@ -512,8 +550,8 @@ def main():
     ROOT_DIR = Path(__file__).parent.parent
     
     # Define directories
-    # INPUT: dataset/midi_files/mpe
-    INPUT_MIDI_DIR = ROOT_DIR / 'dataset' / 'midi_files' / 'mpe'
+    # INPUT: dataset/midi_files/12_tet_mpe
+    INPUT_MIDI_DIR = ROOT_DIR / 'dataset' / 'midi_files' / '12_tet_mpe'
     
     # OUTPUT: dataset/midi_files/53_tet_mpe
     OUTPUT_MIDI_DIR = ROOT_DIR / 'dataset' / 'midi_files' / '53_tet_mpe'
