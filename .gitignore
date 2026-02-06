@@ -6,3 +6,8 @@ src/__pycache__/*.pyc
 *.pyc
 
 *.wav
+
+dataset/text_files/53_tet_files
+
+dataset/midi_files/53_tet_mpe
+
