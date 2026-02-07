@@ -109,7 +109,69 @@ class TokenDatasetMidi(Dataset):
         return x, y, m
 
 #-------------------------------------------------------------------------
-class TokenDataset(Dataset):
+#-------------------------------------------------------------------------
+class TokenDatasetMidiEigen(Dataset):
+    """Dataset that returns (x, y, m, e) — tokens, targets, midi, eigenspace coords."""
+    def __init__(self, dataset, midi_dataset, eigen_dataset, block_size, tokens):
+        self.dataset = dataset
+        self.midi_dataset = midi_dataset      # n x L x 8
+        self.eigen_dataset = eigen_dataset    # n x L x 4  (α, β, γ, D) per token
+        data_size, vocab_size = len(self.dataset), len(tokens)
+        print('data has %d pieces, %d unique tokens (with EigenSpace).' % (data_size, vocab_size))
+        self.stoi = { tk:i for i,tk in enumerate(tokens) }
+        self.itos = { i:tk for i,tk in enumerate(tokens) }
+        self.block_size = block_size
+        self.vocab_size = vocab_size
+        
+    def __len__(self):
+        return len(self.dataset)
+
+    def __getitem__(self, idx):
+        chunk = self.dataset[idx:idx+1]
+        midi = self.midi_dataset[idx:idx+1][0]    # 512 x 8
+        eigen = self.eigen_dataset[idx:idx+1][0]  # 512 x 4
+        
+        dix = [self.stoi[s] for s in chunk[0]]
+        
+        x = torch.tensor(dix[:-1], dtype=torch.long)
+        y = torch.tensor(dix[1:], dtype=torch.long)
+        m = torch.tensor(midi[:-1], dtype=torch.long)
+        e = torch.tensor(eigen[:-1], dtype=torch.float32)
+        
+        return x, y, m, e
+
+#-------------------------------------------------------------------------class TokenDatasetMidiEigen(Dataset):
+    """Dataset that returns (x, y, m, e) — token IDs, targets, MIDI, and EigenSpace coords."""
+    def __init__(self, dataset, midi_dataset, eigen_dataset, block_size, tokens):
+        self.dataset = dataset
+        self.midi_dataset = midi_dataset    # n x L:512 x 8
+        self.eigen_dataset = eigen_dataset  # n x L:512 x 4  (α, β, γ, D)
+        data_size, vocab_size = len(self.dataset), len(tokens)
+        print('data has %d pieces, %d unique tokens (with EigenSpace).' % (data_size, vocab_size))
+        self.stoi = { tk:i for i,tk in enumerate(tokens) }
+        self.itos = { i:tk for i,tk in enumerate(tokens) }
+        self.block_size = block_size
+        self.vocab_size = vocab_size
+        
+    def __len__(self):
+        return len(self.dataset)
+
+    def __getitem__(self, idx):
+        chunk = self.dataset[idx:idx+1]
+        midi = self.midi_dataset[idx:idx+1][0]    # 512 x 8
+        eigen = self.eigen_dataset[idx:idx+1][0]  # 512 x 4
+        
+        # encode every token to an integer
+        dix = [self.stoi[s] for s in chunk[0]]
+        
+        x = torch.tensor(dix[:-1], dtype=torch.long)
+        y = torch.tensor(dix[1:], dtype=torch.long)
+        m = torch.tensor(midi[:-1], dtype=torch.long)
+        e = torch.tensor(eigen[:-1], dtype=torch.float32)
+        
+        return x, y, m, e
+
+#-------------------------------------------------------------------------class TokenDataset(Dataset):
     def __init__(self, dataset, block_size, tokens):
         self.dataset = dataset
         #print("midi shape:", midi_dataset.shape)

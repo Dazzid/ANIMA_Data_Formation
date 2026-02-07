@@ -13,6 +13,7 @@ import numpy as np
 import torch
 import torch.nn as nn
 from torch.nn import functional as F
+from eigenspace import EigenSpaceEmbedding
 
 # set up logging
 import logging
@@ -35,6 +36,8 @@ class GPTConfig:
         self.vocab_size = vocab_size
         self.block_size = block_size
         self.vocab_midi_size = vocab_midi_size
+        self.use_eigenspace = kwargs.pop('use_eigenspace', False)
+        self.n_eigen = kwargs.pop('n_eigen', 4)  # (α, β, γ, D)
         for k,v in kwargs.items():
             setattr(self, k, v)
 
@@ -154,7 +157,13 @@ class GPT(nn.Module):
         #Emebeddings section   
         self.tok_emb = nn.Embedding(config.vocab_size, config.n_embd)
         self.pos_emb = PositionalEmbedding(config.n_embd, self.block_size)
-        self.midi_emb = MidiEmbedding(config.n_embd, self.vocab_midi_size)    
+        self.midi_emb = MidiEmbedding(config.n_embd, self.vocab_midi_size)
+        
+        # EigenSpace embedding: projects 4D harmonic coordinates → n_embd
+        self.use_eigenspace = getattr(config, 'use_eigenspace', False)
+        if self.use_eigenspace:
+            n_eigen = getattr(config, 'n_eigen', 4)
+            self.eigen_emb = EigenSpaceEmbedding(config.n_embd, n_eigen=n_eigen)
        
         #self.pos_emb = nn.Parameter(torch.zeros(1, config.block_size, config.n_embd))
         self.drop = nn.Dropout(config.embd_pdrop)
@@ -226,7 +235,7 @@ class GPT(nn.Module):
         optimizer = torch.optim.AdamW(optim_groups, lr=train_config.learning_rate, betas=train_config.betas)
         return optimizer
 
-    def forward(self, idx, targets=None, midi=None):
+    def forward(self, idx, targets=None, midi=None, eigen=None):
         b, t = idx.size()
      
         assert t <= self.block_size, "Cannot forward, model block size is exhausted."
@@ -238,7 +247,12 @@ class GPT(nn.Module):
         if midi is not None:    
             midi_embeddings = self.midi_emb(midi) # each index maps to a (learnable) vector
         
-        x = self.drop(token_embeddings + position_embeddings + midi_embeddings)
+        # EigenSpace: inject harmonic coordinates as embedding
+        eigen_embeddings = 0.0
+        if self.use_eigenspace and eigen is not None:
+            eigen_embeddings = self.eigen_emb(eigen)  # (B, T, n_embd)
+        
+        x = self.drop(token_embeddings + position_embeddings + midi_embeddings + eigen_embeddings)
         x = self.blocks(x)
         x = self.ln_f(x)
         logits = self.head(x)

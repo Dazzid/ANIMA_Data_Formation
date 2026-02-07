@@ -73,14 +73,17 @@ def apply_reverb(audio, sample_rate, reverb_amount=0):
             delayed[delay_samples:] = audio[:-delay_samples] * decay
             right_reverb += delayed
     
-    # Normalize reverb channels
-    left_peak = np.max(np.abs(left_reverb))
-    if left_peak > 0:
-        left_reverb = left_reverb / left_peak
-    
-    right_peak = np.max(np.abs(right_reverb))
-    if right_peak > 0:
-        right_reverb = right_reverb / right_peak
+    # Normalize reverb channels to match dry signal's peak level
+    # This ensures the mix percentage reflects the actual perceived amount
+    dry_peak = np.max(np.abs(audio))
+    if dry_peak > 0:
+        left_peak = np.max(np.abs(left_reverb))
+        if left_peak > 0:
+            left_reverb = left_reverb * (dry_peak / left_peak)
+        
+        right_peak = np.max(np.abs(right_reverb))
+        if right_peak > 0:
+            right_reverb = right_reverb * (dry_peak / right_peak)
     
     # Mix dry and wet for each channel
     dry_level = 1.0 - mix

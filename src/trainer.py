@@ -73,7 +73,14 @@ class Trainer:
                                 num_workers=config.num_workers)
             losses = []
             pbar = tqdm(enumerate(loader), total=len(loader)) if is_train else enumerate(loader)
-            for it, (x, y, m) in pbar:
+            for it, batch in pbar:
+                # Support both (x, y, m) and (x, y, m, e) tuples
+                if len(batch) == 4:
+                    x, y, m, e = batch
+                    e = e.to(self.device)
+                else:
+                    x, y, m = batch
+                    e = None
                 #print('x:', x.shape, 'y:', y.shape, 'm:',  m.shape)
     
                 # place data on the correct device
@@ -83,7 +90,7 @@ class Trainer:
                 
                 # forward the model
                 with torch.set_grad_enabled(is_train):
-                    logits, _ = model(x, y, m)
+                    logits, _ = model(x, y, m, eigen=e)
                     mask = y != 25  # Create a boolean mask for non-pad tokens
                     logits_masked = logits[mask]
                     y_masked = y[mask]
