@@ -2,3 +2,7 @@ numpy
 mido
 tqdm
 matplotlib
+torch
+transformers
+datasets
+accelerate
