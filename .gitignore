@@ -1,6 +1,27 @@
 
+# OS
 .DS_Store
+Thumbs.db
 
-src/__pycache__/*.pyc
-
+# Python
+__pycache__/
 *.pyc
+*.pyo
+*.egg-info/
+
+# Virtual environments
+.venv/
+venv/
+
+# IDE
+.vscode/
+.idea/
+
+# Data artifacts (tracked via .npy)
+dataset/tokenized_hierarchical/*.txt
+
+# Model checkpoints (too large for git)
+#models/
+
+# Generated output
+output/
